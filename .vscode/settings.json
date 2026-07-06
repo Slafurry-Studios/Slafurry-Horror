@@ -49,11 +49,6 @@
         "Obj/": true,
         "ProjectSettings/": true,
         "temp/": true,
-<<<<<<< HEAD
-        "Temp/": true
-    },
-    "dotnet.defaultSolution": "Slafurry-Horror.sln"
-=======
         "Temp/": true,
         "**/_Vendor": true,
         "**/Logs": true,
@@ -64,7 +59,7 @@
         "**/.gitattributes": true,
         "**/*.csproj": true,
         "**/*.sln": true,
+
     },
-    "dotnet.defaultSolution": "Sourdough-Starter.sln"
->>>>>>> 4929fd7 (add: folder colors (#1))
+    "dotnet.defaultSolution": "Slafurry-Horror.sln"
 }

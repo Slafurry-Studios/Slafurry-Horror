@@ -1,5 +1,1 @@
-<<<<<<< HEAD
 {"assetModified":["Assets/FolderColor","Assets/_Game","Assets/_Vendor","Assets/_Game/00_Scripts","Assets/_Game/01_Objects","Assets/_Game/02_Art","Assets/_Game/03_Audio","Assets/_Game/04_Scenes","Assets/_Game/05_Settings"],"assetModifiedTexturePath":["Assets/FolderColor/FolderColorLogo.png","Assets/_Vendor/FolderColor/FolderPurple.png","Assets/_Vendor/FolderColor/BlueishGreenFolder.png","Assets/_Vendor/FolderColor/BlueishGreenFolder.png","Assets/_Vendor/FolderColor/FolderBlue.png","Assets/_Vendor/FolderColor/RedFolder.png","Assets/_Vendor/FolderColor/FolderPurple.png","Assets/_Vendor/FolderColor/Whitefolder.png","Assets/_Vendor/FolderColor/BlackFolder.png"]}
-=======
-{"assetModified":["Assets/FolderColor","Assets/_Game","Assets/_Vendor"],"assetModifiedTexturePath":["Assets/FolderColor/FolderColorLogo.png","Assets/_Vendor/FolderColor/FolderPurple.png","Assets/_Vendor/FolderColor/BlueishGreenFolder.png"]}
->>>>>>> 4929fd7 (add: folder colors (#1))

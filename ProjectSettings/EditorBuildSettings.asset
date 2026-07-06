@@ -6,10 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-<<<<<<< HEAD
     path: Assets/_Game/04_Scenes/Templates/TemplateGameScene.unity
-=======
-    path: Assets/_Game/Scenes/SampleScene.unity
->>>>>>> 4929fd7 (add: folder colors (#1))
     guid: 99c9720ab356a0642a771bea13969a05
   m_configObjects: {}
