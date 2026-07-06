@@ -49,17 +49,7 @@
         "Obj/": true,
         "ProjectSettings/": true,
         "temp/": true,
-        "Temp/": true,
-        "**/_Vendor": true,
-        "**/Logs": true,
-        "**/UIElementsSchema": true,
-        "**/Packages": true,
-        "**/UserSettings": true,
-        "**/.gitignore": true,
-        "**/.gitattributes": true,
-        "**/*.csproj": true,
-        "**/*.sln": true,
-
+        "Temp/": true
     },
     "dotnet.defaultSolution": "Slafurry-Horror.sln"
 }
