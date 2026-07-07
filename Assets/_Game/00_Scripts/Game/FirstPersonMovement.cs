@@ -17,7 +17,6 @@ public class FirstPersonMovement : MonoBehaviour
 
     [Header("Jump")]
     public bool canJump = true;
-    [Tooltip("Kecepatan awal lompatan (m/s)")]
     public float jumpForce = 6f;
     public KeyCode jumpKey = KeyCode.Space;
 
@@ -165,7 +164,7 @@ public class FirstPersonMovement : MonoBehaviour
         float currentTop = controller.center.y + controller.height / 2f;
         float standTop = Application.isPlaying
             ? standCenter.y + standHeight / 2f
-            : controller.center.y + controller.height / 2f; // sebelum Play, standHeight belum ditangkap
+            : controller.center.y + controller.height / 2f; 
 
         Gizmos.color = IsCrouching ? Color.red : Color.cyan;
         Gizmos.DrawWireSphere(transform.position + Vector3.up * currentTop, controller.radius * 0.9f);
