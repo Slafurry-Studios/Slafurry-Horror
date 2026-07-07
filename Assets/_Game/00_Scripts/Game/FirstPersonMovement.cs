@@ -17,7 +17,6 @@ public class FirstPersonMovement : MonoBehaviour
 
     [Header("Jump")]
     public bool canJump = true;
-    [Tooltip("Kecepatan awal lompatan (m/s)")]
     public float jumpForce = 6f;
     public KeyCode jumpKey = KeyCode.Space;
 
@@ -30,10 +29,8 @@ public class FirstPersonMovement : MonoBehaviour
     public KeyCode crouchKey = KeyCode.LeftControl;
     public float crouchSpeed = 2.5f;
     public float crouchHeight = 1f;
-    public float standHeight = 2f;
     [Range(0f, 1.5f)]
     public float crouchCameraDrop = 0.5f;
-    [Tooltip("Layer penghalang saat cek boleh berdiri. Jangan masukkan layer Player.")]
     public LayerMask obstacleMask;
 
     [Header("Cinemachine")]
@@ -51,6 +48,10 @@ public class FirstPersonMovement : MonoBehaviour
     private CinemachineTransposer transposer;
     private float standOffsetY;
     private float standLocalY;
+
+    private float standHeight;
+    private Vector3 standCenter;
+
     private Vector3 verticalVelocity;
     private Vector3 lastHorizontalVelocity;
 
@@ -58,6 +59,9 @@ public class FirstPersonMovement : MonoBehaviour
     {
         instance = this;
         controller = GetComponent<CharacterController>();
+
+        standHeight = controller.height;
+        standCenter = controller.center;
 
         if (virtualCamera != null)
         {
@@ -71,7 +75,6 @@ public class FirstPersonMovement : MonoBehaviour
     {
         if (canJump && Input.GetKeyDown(jumpKey)) Jump();
         if (canCrouch && Input.GetKeyDown(crouchKey)) ToggleCrouch();
-
         HandleMovement();
     }
 
@@ -121,20 +124,24 @@ public class FirstPersonMovement : MonoBehaviour
     private bool CanStandUp()
     {
         float currentTop = controller.center.y + controller.height / 2f;
-        float standTop = standHeight / 2f;
+        float standTop = standCenter.y + standHeight / 2f;
         float extraHeightNeeded = standTop - currentTop;
+
         float skin = 0.05f;
-
         Vector3 rayOrigin = transform.position + Vector3.up * (currentTop - skin);
-        bool blocked = Physics.Raycast(rayOrigin, Vector3.up, extraHeightNeeded + skin, obstacleMask, QueryTriggerInteraction.Ignore);
 
+        bool blocked = Physics.Raycast(rayOrigin, Vector3.up, extraHeightNeeded + skin, obstacleMask, QueryTriggerInteraction.Ignore);
         return !blocked;
     }
 
     private void ApplyCrouchVisuals()
     {
         controller.height = IsCrouching ? crouchHeight : standHeight;
-        controller.center = new Vector3(0f, controller.height / 2f - standHeight / 2f, 0f);
+
+        float centerY = IsCrouching
+            ? standCenter.y - (standHeight - crouchHeight) / 2f
+            : standCenter.y;
+        controller.center = new Vector3(standCenter.x, centerY, standCenter.z);
 
         if (transposer != null)
         {
@@ -155,10 +162,13 @@ public class FirstPersonMovement : MonoBehaviour
         if (controller == null) return;
 
         float currentTop = controller.center.y + controller.height / 2f;
-        float standTop = standHeight / 2f;
+        float standTop = Application.isPlaying
+            ? standCenter.y + standHeight / 2f
+            : controller.center.y + controller.height / 2f; 
 
         Gizmos.color = IsCrouching ? Color.red : Color.cyan;
         Gizmos.DrawWireSphere(transform.position + Vector3.up * currentTop, controller.radius * 0.9f);
+
         Gizmos.color = Color.magenta;
         Gizmos.DrawWireSphere(transform.position + Vector3.up * standTop, controller.radius * 0.9f);
     }
