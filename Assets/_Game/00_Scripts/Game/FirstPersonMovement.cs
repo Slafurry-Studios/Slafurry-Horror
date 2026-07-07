@@ -29,11 +29,9 @@ public class FirstPersonMovement : MonoBehaviour
     public bool canCrouch = true;
     public KeyCode crouchKey = KeyCode.LeftControl;
     public float crouchSpeed = 2.5f;
-    [Tooltip("Tinggi CharacterController saat crouch. Tinggi berdiri diambil otomatis dari Height yang sudah anda set di komponen CharacterController.")]
     public float crouchHeight = 1f;
     [Range(0f, 1.5f)]
     public float crouchCameraDrop = 0.5f;
-    [Tooltip("Layer penghalang saat cek boleh berdiri. Jangan masukkan layer Player.")]
     public LayerMask obstacleMask;
 
     [Header("Cinemachine")]
