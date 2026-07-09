@@ -1240,7 +1240,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   promptLabel: Press E to Interact
-  examineDistance: 1.2
+  examineDistance: 0.01
   minExamineDistance: 0.6
   maxExamineDistance: 2.5
   examineScaleMultiplier: 1
@@ -2721,8 +2721,8 @@ Transform:
   m_GameObject: {fileID: 778142419}
   serializedVersion: 2
   m_LocalRotation: {x: 1.1102231e-17, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 3.3173914, y: -0.049999952, z: 0.27862072}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 3.3173914, y: 0.038, z: 0.952}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 702434885}
@@ -2882,7 +2882,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   promptLabel: Press E to Interact
-  examineDistance: 1.2
+  examineDistance: 0.01
   minExamineDistance: 0.6
   maxExamineDistance: 2.5
   examineScaleMultiplier: 1
@@ -3913,7 +3913,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   promptLabel: Press E to Interact
-  examineDistance: 1.2
+  examineDistance: 0.01
   minExamineDistance: 0.6
   maxExamineDistance: 2.5
   examineScaleMultiplier: 1
