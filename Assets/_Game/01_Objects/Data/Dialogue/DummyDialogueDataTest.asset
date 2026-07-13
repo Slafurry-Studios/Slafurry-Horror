@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7420c67ef41702345a3c75c2fb879a81, type: 3}
+  m_Name: DummyDialogueDataTest
+  m_EditorClassIdentifier: 
+  lockPlayer: 0
+  lines:
+  - speaker: 0
+    text: SAYA AKAN LAWAN!!
+    autoAdvanceDelay: 0
+  - speaker: 1
+    text: orang didesa gk pake dolar kok
+    autoAdvanceDelay: 0
+  - speaker: 2
+    text: cabut dulu ted
+    autoAdvanceDelay: 0

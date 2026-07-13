@@ -208,4 +208,9 @@ sysinfo.txt
 ### Probuilder
 ProjectSettings/Packages/com.unity.probuilder/Settings.json
 
+### Claude
+.claude/
+CLAUDE.md
+.mcp.json
+
 # End of https://www.toptal.com/developers/gitignore/api/unity,intellij,visualstudiocode
