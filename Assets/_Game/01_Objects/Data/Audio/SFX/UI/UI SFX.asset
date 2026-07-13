@@ -9,8 +9,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5a31b9af8a529ba3ea3c290e47a3f733, type: 3}
-  m_Name: MainSFXData
+  m_Script: {fileID: 11500000, guid: 83b5b3454719b816593df0cb8c16f82a, type: 3}
+  m_Name: UI SFX
   m_EditorClassIdentifier: 
-  categories:
-  - {fileID: 11400000, guid: 52ddc2b1b5eea6cde9d5cdb1f1cabe37, type: 2}
+  categoryName: UI
+  effects:
+  - groupID: Click
+    clips:
+    - {fileID: 8300000, guid: 86963cef63de4524c94624e354b240c5, type: 3}
+    volume: 3.51
+    maxSimultaneous: 1
+  poolSize: 8
