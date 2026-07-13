@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public enum DoorState
@@ -31,12 +32,18 @@ public class InteractableDoor : MonoBehaviour
     [Tooltip("{0} = nama item yang dibutuhkan.")]
     public string needItemMessage = "Need {0}";
 
+    [Header("Barricade (kayu penghalang, opsional)")]
+    [Tooltip("Muncul kalau masih ada DoorBarricade aktif yang menghalangi pintu ini.")]
+    public string blockedMessage = "Something is blocking this door";
+
     public bool IsOpen { get; private set; }
     private bool unlockedByItem = false;
 
     private Quaternion closedRotation;
     private Quaternion openRotation;
     private Coroutine moveRoutine;
+
+    private readonly List<DoorBarricade> activeBarricades = new List<DoorBarricade>();
 
     void Start()
     {
@@ -45,15 +52,31 @@ public class InteractableDoor : MonoBehaviour
         openRotation = Quaternion.Euler(0f, openAngleY, 0f) * closedRotation;
     }
 
+    public void RegisterBarricade(DoorBarricade barricade)
+    {
+        if (!activeBarricades.Contains(barricade)) activeBarricades.Add(barricade);
+    }
+
+    public void UnregisterBarricade(DoorBarricade barricade)
+    {
+        activeBarricades.Remove(barricade);
+    }
+
     public string GetPrompt()
     {
         return IsOpen ? closePrompt : openPrompt;
     }
 
-    /// <summary>Coba buka/tutup pintu. Kalau gagal (locked/butuh item), return false dan isi failMessage.</summary>
+
     public bool TryInteract(out string failMessage)
     {
         failMessage = null;
+
+        if (activeBarricades.Count > 0)
+        {
+            failMessage = blockedMessage;
+            return false;
+        }
 
         if (doorState == DoorState.Locked)
         {
