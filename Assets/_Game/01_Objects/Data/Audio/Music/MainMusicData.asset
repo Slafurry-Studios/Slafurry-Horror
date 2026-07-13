@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: MainMusicData
   m_EditorClassIdentifier: 
   tracks:
-  - trackName: 
-    clip: {fileID: 0}
-    volume: 0
+  - trackName: DebugMusic
+    clip: {fileID: 8300000, guid: 04ebab11e4a620e47ad3ff602f8ecdfa, type: 3}
+    volume: 5.31
