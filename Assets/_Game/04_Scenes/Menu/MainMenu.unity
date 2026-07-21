@@ -2296,6 +2296,21 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2155219766565442760, guid: 0c88c401719aee361bd0248c09f4e1b1,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3178714354123533607, guid: 0c88c401719aee361bd0248c09f4e1b1,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3528180743831024051, guid: 0c88c401719aee361bd0248c09f4e1b1,
+        type: 3}
+      propertyPath: m_SortingOrder
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 3599046481498659379, guid: 0c88c401719aee361bd0248c09f4e1b1,
         type: 3}
       propertyPath: musicData
@@ -2321,6 +2336,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: ====== SYSTEM ======
+      objectReference: {fileID: 0}
+    - target: {fileID: 8786718041134161729, guid: 0c88c401719aee361bd0248c09f4e1b1,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8873653638904085371, guid: 0c88c401719aee361bd0248c09f4e1b1,
         type: 3}
@@ -3484,6 +3504,11 @@ PrefabInstance:
       propertyPath: aboutMenu
       value: 
       objectReference: {fileID: 8468961151309403261}
+    - target: {fileID: 6429109925603218231, guid: c84e02c25bfa70c959591b988820e9f5,
+        type: 3}
+      propertyPath: gameScene
+      value: SequencerTest
+      objectReference: {fileID: 0}
     - target: {fileID: 6429109925603218231, guid: c84e02c25bfa70c959591b988820e9f5,
         type: 3}
       propertyPath: settingsMenu
