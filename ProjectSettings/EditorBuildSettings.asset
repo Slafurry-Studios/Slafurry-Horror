@@ -12,6 +12,12 @@ EditorBuildSettings:
     path: Assets/_Game/04_Scenes/Menu/MainMenu.unity
     guid: 9746466f3c1cef4ddad3feabd01a9553
   - enabled: 1
+    path: Assets/_Game/04_Scenes/Cutscene/IntroDate.unity
+    guid: 616615f6fd5402ea0b0c697f1d1e52c6
+  - enabled: 1
     path: Assets/_Game/04_Scenes/Dev/SequencerTest.unity
     guid: 12ff773dfc58a352797eecf0161d8c3a
+  - enabled: 1
+    path: Assets/_Game/04_Scenes/Cutscene/ToOfficeCutscene.unity
+    guid: 3e7286ef2f40e0db2b15e978872a5158
   m_configObjects: {}

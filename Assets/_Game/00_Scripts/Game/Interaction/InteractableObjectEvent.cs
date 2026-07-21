@@ -26,6 +26,11 @@ public class InteractableObjectEvent : MonoBehaviour
         onInteract?.Invoke();
     }
 
+    public bool CanInteract()
+    {
+        return !interactOnce || !hasBeenInteracted;
+    }
+
     public string GetPromptText()
     {
         return promptText;
