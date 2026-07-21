@@ -1,4 +1,5 @@
 using UnityEngine;
+using Slafurry.System.Pause;
 
 public class FirstPersonLook : MonoBehaviour
 {
@@ -8,26 +9,21 @@ public class FirstPersonLook : MonoBehaviour
     public float smoothing = 1.5f;
     Vector2 velocity;
     Vector2 frameVelocity;
-
     [Header("Lock Rotasi")]
     public bool rotasiDikunci = false;
-
     void Start()
     {
         if (FirstPersonMovement.instance != null)
         {
             character = FirstPersonMovement.instance.transform;
         }
-
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-
         SinkronkanVelocityDenganRotasiSekarang();
     }
-
     void Update()
     {
-        if (rotasiDikunci)
+        if (rotasiDikunci || Pause.IsPaused)
         {
             frameVelocity = Vector2.zero;
             return;
@@ -36,12 +32,10 @@ public class FirstPersonLook : MonoBehaviour
         {
             return;
         }
-
         Vector2 mouseDelta = new Vector2(
             Input.GetAxisRaw("Mouse X"),
             Input.GetAxisRaw("Mouse Y")
         );
-
         Vector2 rawFrameVelocity = Vector2.Scale(
             mouseDelta,
             Vector2.one * sensitivity
@@ -53,7 +47,6 @@ public class FirstPersonLook : MonoBehaviour
         );
         velocity += frameVelocity;
         velocity.y = Mathf.Clamp(velocity.y, -90f, 90f);
-
         character.localRotation = Quaternion.AngleAxis(
             velocity.x,
             Vector3.up
@@ -63,20 +56,17 @@ public class FirstPersonLook : MonoBehaviour
             Vector3.right
         );
     }
-
     public void LockRotasi()
     {
         rotasiDikunci = true;
         frameVelocity = Vector2.zero;
     }
-
     public void UnlockRotasi()
     {
         SinkronkanVelocityDenganRotasiSekarang();
         frameVelocity = Vector2.zero;
         rotasiDikunci = false;
     }
-
     private void SinkronkanVelocityDenganRotasiSekarang()
     {
         float cameraPitch = transform.localEulerAngles.x;
@@ -85,7 +75,6 @@ public class FirstPersonLook : MonoBehaviour
             cameraPitch -= 360f;
         }
         velocity.y = -cameraPitch;
-
         if (character != null)
         {
             float characterYaw = character.localEulerAngles.y;
