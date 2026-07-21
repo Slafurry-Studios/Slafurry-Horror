@@ -47,7 +47,7 @@ public class PlayerInteractEvent : MonoBehaviour
 
         DetectInteractable();
 
-        if (currentInteractable != null && Input.GetKeyDown(interactKey))
+        if (currentInteractable != null && currentInteractable.CanInteract() && Input.GetKeyDown(interactKey))
         {
             currentInteractable.Interact();
             HidePrompt();
@@ -67,7 +67,7 @@ public class PlayerInteractEvent : MonoBehaviour
         if (Physics.Raycast(ray, out RaycastHit hit, interactRange, interactableMask))
         {
             var interactable = hit.transform.GetComponentInParent<InteractableObjectEvent>();
-            if (interactable != null)
+            if (interactable != null && interactable.CanInteract())
             {
                 currentInteractable = interactable;
                 ShowPrompt(interactable.GetPromptText());
