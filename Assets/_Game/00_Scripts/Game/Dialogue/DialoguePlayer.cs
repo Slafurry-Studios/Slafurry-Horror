@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine;
 using TMPro;
 using Slafurry.System.Audio;
+using UnityEngine.Events;
 
 public class DialoguePlayer : MonoBehaviour
 {
@@ -22,14 +23,14 @@ public class DialoguePlayer : MonoBehaviour
 
     private void Awake() => instance = this;
 
-    public void Play(DialogueData data, Action onComplete = null)
+    public void Play(DialogueData data, UnityEvent onComplete = null)
     {
         if (IsPlaying) return;
         if (data == null || data.lines == null || data.lines.Length == 0) return;
         StartCoroutine(RunDialogue(data, onComplete));
     }
 
-    private IEnumerator RunDialogue(DialogueData data, Action onComplete)
+    private IEnumerator RunDialogue(DialogueData data, UnityEvent onComplete)
     {
         IsPlaying = true;
         ui.Show();

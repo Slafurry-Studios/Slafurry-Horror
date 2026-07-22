@@ -38,6 +38,10 @@ git clone [repo-url]
 ```
 Open the project in Unity Hub, let it import, then open the `Boot` scene to start.
 
+### Documentation
+- Shared runtime systems: [Assets/_Game/00_Scripts/System/README.md](Assets/_Game/00_Scripts/System/README.md)
+- Utils and gameplay components: [Assets/_Game/00_Scripts/Utils/README.md](Assets/_Game/00_Scripts/Utils/README.md)
+
 ---
 
 ## TECH STACK
