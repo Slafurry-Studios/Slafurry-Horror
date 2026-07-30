@@ -244,7 +244,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &609489759114569540
 RectTransform:
   m_ObjectHideFlags: 0
@@ -288,7 +288,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 10
   m_TargetDisplay: 0
 --- !u!114 &2378426847651931390
 MonoBehaviour:
@@ -338,9 +338,9 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2155219766565442760}
   m_Enabled: 1
-  m_Alpha: 1
+  m_Alpha: 0
   m_Interactable: 1
-  m_BlocksRaycasts: 1
+  m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
 --- !u!114 &6426903096400368200
 MonoBehaviour:
@@ -358,6 +358,8 @@ MonoBehaviour:
   progressSlider: {fileID: 9075277918653613973}
   statusText: {fileID: 3767245316279773293}
   hideDelay: 0.3
+  excludedScenes:
+  - MainMenu
 --- !u!1 &2306972083950607817
 GameObject:
   m_ObjectHideFlags: 0
@@ -466,7 +468,7 @@ RectTransform:
   m_Father: {fileID: 920359388914509528}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -541,7 +543,7 @@ RectTransform:
   m_Father: {fileID: 1877873404082620103}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -627,7 +629,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6098e7656afbc8e0966bc109d89b759, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sfxData: {fileID: 0}
+  sfxData: {fileID: 11400000, guid: 86ead341c510c364c98c4644b96be500, type: 2}
   sfxMixerGroup: {fileID: 4882950418620859817, guid: 67add75916ccc835aa4770838bc6e6bc,
     type: 2}
 --- !u!1 &6874516675506841109
@@ -856,9 +858,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ace2740ad9c01b3e8dfd2889fe2e10f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  musicData: {fileID: 0}
+  musicData: {fileID: 11400000, guid: 7da0a73157b2b223289a3e200c7a5072, type: 2}
   musicSource: {fileID: 17962639745223658}
-  sceneTracks: []
+  sceneTracks:
+  - sceneName: MainMenu
+    trackName: DebugMusic
 --- !u!82 &17962639745223658
 AudioSource:
   m_ObjectHideFlags: 0
@@ -870,7 +874,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 5697733758601958284, guid: 67add75916ccc835aa4770838bc6e6bc,
     type: 2}
-  m_audioClip: {fileID: 0}
+  m_audioClip: {fileID: 8300000, guid: 04ebab11e4a620e47ad3ff602f8ecdfa, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1

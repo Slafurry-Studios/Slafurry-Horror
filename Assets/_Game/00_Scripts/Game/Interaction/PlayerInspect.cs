@@ -6,46 +6,35 @@ using Slafurry.System.Pause;
 
 public class PlayerInspect : MonoBehaviour
 {
-    [Header("Referensi")]
     public Transform viewTransform;
     public Transform examinePoint;
     public FirstPersonLook firstPersonLook;
     public FirstPersonMovement playerMovement;
 
-    [Header("Kamera (Camera Stack untuk isolasi background)")]
-    [Tooltip("Main Camera (Base) yang punya CinemachineBrain.")]
     public Camera mainCamera;
-    [Tooltip("Overlay camera yang cuma render Quad penggelap layar.")]
     public Camera darkenOverlayCamera;
-    [Tooltip("Overlay camera yang cuma render objek sedang diperiksa (layer ExamineIsolated).")]
     public Camera itemOverlayCamera;
-    [Tooltip("WAJIB layer BARU yang KOSONG, tidak dipakai objek apapun secara permanen - dipakai sementara saat examine saja.")]
     public string isolationLayerName = "ExamineIsolated";
-    [Tooltip("Opsional: lampu dekat examinePoint yang otomatis nyala selama examine.")]
     public Light examineLight;
 
-    [Header("Posisi Objek di Layar")]
-    [Tooltip("Geser objek dari tengah layar. X negatif = ke kiri, X positif = ke kanan, Y positif = ke atas.")]
     public Vector2 screenOffset = new Vector2(-0.3f, 0f);
 
-    [Header("Deteksi Objek")]
     public float interactRange = 3f;
     public LayerMask interactableMask;
     public KeyCode interactKey = KeyCode.E;
 
-    [Header("Rotasi Saat Inspect")]
     public float rotationSpeed = 100f;
 
-    [Header("UI Prompt")]
     public TMP_Text promptText;
     public TMP_Text inspectPromptText;
     public string inspectExitText = "Press E to Back";
 
-    [Header("UI Detail Examine (Judul & Deskripsi)")]
     public TMP_Text examineTitleText;
     public TMP_Text examineDescriptionText;
 
-    [Header("Transisi")]
+    public CanvasGroup examineBackgroundGroup;
+    public float fadeDuration = 0.3f;
+
     public bool smoothTransition = true;
     public float moveLerpSpeed = 8f;
     public float returnDuration = 0.4f;
@@ -67,6 +56,7 @@ public class PlayerInspect : MonoBehaviour
     private System.Func<float> freezeMovementFunc;
     private Vector3 previousMousePosition;
     private Coroutine returnRoutine;
+    private Coroutine fadeRoutine;
 
     private int originalCullingMask;
     private int isolationLayer = -1;
@@ -92,6 +82,14 @@ public class PlayerInspect : MonoBehaviour
 
         if (darkenOverlayCamera != null) darkenOverlayCamera.enabled = false;
         if (itemOverlayCamera != null) itemOverlayCamera.enabled = false;
+
+        if (examineBackgroundGroup != null)
+        {
+            examineBackgroundGroup.alpha = 0f;
+            examineBackgroundGroup.blocksRaycasts = false;
+            examineBackgroundGroup.interactable = false;
+            examineBackgroundGroup.gameObject.SetActive(false);
+        }
     }
 
     void Update()
@@ -223,6 +221,7 @@ public class PlayerInspect : MonoBehaviour
 
         HidePrompt();
         ShowInspectPrompt(inspectExitText);
+        FadeBackground(1f);
     }
 
     private void CacheAndSetIsolationLayer(Transform item)
@@ -322,6 +321,7 @@ public class PlayerInspect : MonoBehaviour
             FinishReturn(t, itemRigidbody, itemHadGravity, itemColliders);
 
         HideInspectPrompt();
+        FadeBackground(0f);
         inspectedItem = null;
         IsInspecting = false;
     }
@@ -385,5 +385,45 @@ public class PlayerInspect : MonoBehaviour
     {
         if (promptText == null) return;
         promptText.enabled = false;
+    }
+
+    private void FadeBackground(float targetAlpha)
+    {
+        if (examineBackgroundGroup == null) return;
+
+        if (fadeRoutine != null) StopCoroutine(fadeRoutine);
+        fadeRoutine = StartCoroutine(FadeBackgroundRoutine(targetAlpha));
+    }
+
+    private IEnumerator FadeBackgroundRoutine(float targetAlpha)
+    {
+        if (targetAlpha > 0f)
+        {
+            examineBackgroundGroup.gameObject.SetActive(true);
+            examineBackgroundGroup.blocksRaycasts = true;
+            examineBackgroundGroup.interactable = true;
+        }
+
+        float startAlpha = examineBackgroundGroup.alpha;
+        float elapsed = 0f;
+
+        while (elapsed < fadeDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float p = Mathf.Clamp01(elapsed / fadeDuration);
+            examineBackgroundGroup.alpha = Mathf.Lerp(startAlpha, targetAlpha, p);
+            yield return null;
+        }
+
+        examineBackgroundGroup.alpha = targetAlpha;
+
+        if (targetAlpha <= 0f)
+        {
+            examineBackgroundGroup.blocksRaycasts = false;
+            examineBackgroundGroup.interactable = false;
+            examineBackgroundGroup.gameObject.SetActive(false);
+        }
+
+        fadeRoutine = null;
     }
 }
