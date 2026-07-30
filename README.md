@@ -2,7 +2,7 @@
 Game psychological horror survival-mystery first-person berlatar tahun 1987 di sebuah daerah terisolasi.
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/ced20118-3c96-492a-9448-b8bf25ed05d5" width="100%" alt="One Sacrifice One Truth banner" />
+  <img src="https://github.com/user-attachments/assets/5dbea424-6591-453e-bd0e-6cf64e3ddd9c" width="100%" alt="One Sacrifice One Truth banner" />
 </p>
 <br>
 <p align="left">
