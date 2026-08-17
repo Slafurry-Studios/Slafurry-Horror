@@ -5,6 +5,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   retrieve:
@@ -26,18 +27,17 @@ jobs:
       - name: Sync latest main state & assets
         run: |
           git fetch origin main
-
           rm -rf state \
             Assets/_Game/02_Art/Sprite \
             Assets/_Game/03_Audio \
             Assets/_Game/02_Art/Mesh \
             Assets/_Game/02_Art/Texture
-
           mkdir -p \
             state \
             Assets/_Game/02_Art/Sprite \
-            Assets/_Game/03_Audio
-
+            Assets/_Game/03_Audio \
+            Assets/_Game/02_Art/Mesh \
+            Assets/_Game/02_Art/Texture
           git archive origin/main -- state 2>/dev/null | tar -x || true
           git archive origin/main -- Assets/_Game/02_Art/Sprite 2>/dev/null | tar -x || true
           git archive origin/main -- Assets/_Game/03_Audio 2>/dev/null | tar -x || true
@@ -71,7 +71,7 @@ jobs:
             --download-dir "Assets/_Game/03_Audio" \
             --project-name "${{ github.repository }} (audio)" \
             --discord-webhook "${{ secrets.DISCORD_WEBHOOK_URL }}"
-            
+
       - name: Retrieve new mesh files
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -101,6 +101,7 @@ jobs:
             --discord-webhook "${{ secrets.DISCORD_WEBHOOK_URL }}"
 
       - name: Commit retrieved files to chore/asset
+        id: commit
         env:
           BOT_GIT_USERNAME: ${{ vars.BOT_GIT_USERNAME || 'Kei Tendou' }}
           BOT_GIT_EMAIL: ${{ vars.BOT_GIT_EMAIL || 'Slafurry[bot]@users.noreply.github.com' }}
@@ -124,7 +125,7 @@ jobs:
             "$WORKTREE/Assets/_Game/02_Art/Sprite" \
             "$WORKTREE/Assets/_Game/03_Audio" \
             "$WORKTREE/Assets/_Game/02_Art/Mesh" \
-            "$WORKTREE/Assets/_Game/02_Art/Texture" \
+            "$WORKTREE/Assets/_Game/02_Art/Texture"
 
           cp -f state/*.json \
             "$WORKTREE/state/" 2>/dev/null || true
@@ -152,11 +153,14 @@ jobs:
 
           if git diff --cached --quiet; then
             echo "No changes, skipping."
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
           git commit -m "chore(assets): retrieve new drive files [skip ci]"
           git push origin HEAD:chore/asset
+
+          echo "has_changes=true" >> "$GITHUB_OUTPUT"
 
       - name: Create PR
         if: steps.commit.outputs.has_changes == 'true'
