@@ -157,3 +157,21 @@ jobs:
 
           git commit -m "chore(assets): retrieve new drive files [skip ci]"
           git push origin HEAD:chore/asset
+
+      - name: Create PR
+        if: steps.commit.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.PR_PAT || secrets.GITHUB_TOKEN }}
+        run: |
+          cd /tmp/chore-asset
+
+          if gh pr view chore/asset --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            echo "PR already exists for chore/asset, skipping creation."
+          else
+            gh pr create \
+              --base main \
+              --head chore/asset \
+              --title "chore(assets): retrieve new drive files" \
+              --body "Automated asset sync from Google Drive." \
+              --repo "${{ github.repository }}"
+          fi
