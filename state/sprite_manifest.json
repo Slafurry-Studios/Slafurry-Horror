@@ -1090,17 +1090,5 @@
     "retrieve_status": "downloaded",
     "downloaded_as": "SETTINGS/settings preview.png",
     "downloaded_modified_time": "2026-07-16T15:35:40.000Z"
-  },
-  "1fyaHaftNJT0E6bjmxk02sqBa9HxAq22u": {
-    "mimeType": "image/png",
-    "webViewLink": "https://drive.google.com/file/d/1fyaHaftNJT0E6bjmxk02sqBa9HxAq22u/view?usp=drivesdk",
-    "size": "83",
-    "id": "1fyaHaftNJT0E6bjmxk02sqBa9HxAq22u",
-    "name": "FillBox.png",
-    "modifiedTime": "2026-08-16T12:54:57.000Z",
-    "relative_path": "Debug/FillBox.png",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "Debug/FillBox.png",
-    "downloaded_modified_time": "2026-08-16T12:54:57.000Z"
   }
 }
