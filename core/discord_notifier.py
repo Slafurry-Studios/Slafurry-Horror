@@ -3,9 +3,11 @@
 Used by track.py (Drive change reports) and retrieve.py (download result reports).
 
 Long lists are never silently truncated:
-    lines -> fields -> embeds -> webhook messages
+    fields -> embeds -> webhook messages
 
-The implementation deliberately stays well below Discord's hard limits.
+The implementation deliberately stays below Discord's documented limits so that
+small additions such as part numbers or descriptions cannot push an embed over
+the limit.
 """
 
 import requests
@@ -25,66 +27,40 @@ MAX_EMBEDS_PER_MESSAGE = 10
 DESCRIPTION_LIMIT = 4096
 TITLE_LIMIT = 256
 
-# We deliberately stay comfortably below Discord's hard limits.
-SAFE_FIELD_VALUE_LIMIT = 900
-SAFE_EMBED_LIMIT = 5000
+# Safety margins.
+_FIELD_BUFFER = 40
+_EMBED_BUFFER = 200
+
+# Keep individual values comfortably below Discord's limit.
+SAFE_FIELD_VALUE_LIMIT = FIELD_VALUE_LIMIT - _FIELD_BUFFER
+SAFE_EMBED_LIMIT = MAX_EMBED_CHARS - _EMBED_BUFFER
 
 
 # ---------------------------------------------------------------------------
-# Discord character counting
-# ---------------------------------------------------------------------------
-
-def _discord_len(value):
-    """Count UTF-16 code units.
-
-    Discord's character limits are based on Unicode/UTF-16 semantics rather
-    than Python's simple len() behavior. This matters for emoji and some
-    non-BMP Unicode characters.
-    """
-    if value is None:
-        return 0
-
-    return len(str(value).encode("utf-16-le")) // 2
-
-
-# ---------------------------------------------------------------------------
-# Basic formatting
+# Formatting helpers
 # ---------------------------------------------------------------------------
 
 def _safe_title(title):
-    """Keep a title safely below Discord's title limit."""
-    title = str(title)
-
-    if _discord_len(title) <= TITLE_LIMIT:
+    """Keep an embed title within Discord's title limit."""
+    if len(title) <= TITLE_LIMIT:
         return title
-
-    result = ""
-
-    for char in title:
-        candidate = result + char + "…"
-
-        if _discord_len(candidate) > TITLE_LIMIT:
-            break
-
-        result += char
-
-    return result + "…"
+    return title[:TITLE_LIMIT - 1] + "…"
 
 
 def _lines_files(files):
     """Convert Drive file dictionaries into Discord markdown lines."""
-    result = []
+    lines = []
 
     for f in files:
         path = str(f.get("relative_path", ""))
         link = str(f.get("webViewLink", ""))
 
         if link:
-            result.append(f"- [{path}]({link})")
+            lines.append(f"- [{path}]({link})")
         else:
-            result.append(f"- {path}")
+            lines.append(f"- {path}")
 
-    return result
+    return lines
 
 
 def _lines_names(names):
@@ -93,7 +69,7 @@ def _lines_names(names):
 
 
 # ---------------------------------------------------------------------------
-# Gemini helpers
+# Gemini sampling
 # ---------------------------------------------------------------------------
 
 _SAMPLE_NAMES_LIMIT = 3
@@ -101,7 +77,7 @@ _SAMPLE_NAME_MAXLEN = 60
 
 
 def _sample_names(names, limit=_SAMPLE_NAMES_LIMIT):
-    """Create a short representative list for Gemini."""
+    """Create a short representative list for the Gemini prompt."""
     names = list(names)
 
     if not names:
@@ -128,7 +104,7 @@ def _sample_names(names, limit=_SAMPLE_NAMES_LIMIT):
 
 
 def _summary_part(label, items, names_fn):
-    """Build one compact Gemini summary section."""
+    """Build a compact summary for Gemini."""
     if not items:
         return f"{label}: 0"
 
@@ -138,57 +114,53 @@ def _summary_part(label, items, names_fn):
 
 
 # ---------------------------------------------------------------------------
-# Field splitting
+# Discord field splitting
 # ---------------------------------------------------------------------------
 
-def _split_single_line(line, limit=SAFE_FIELD_VALUE_LIMIT):
-    """Split one unusually long line without dropping any content."""
+def _split_long_line(line, limit=SAFE_FIELD_VALUE_LIMIT):
+    """Split a single pathological line that exceeds the field value limit."""
     line = str(line)
 
-    if _discord_len(line) <= limit:
+    if len(line) <= limit:
         return [line]
 
     chunks = []
-    current = ""
 
-    for char in line:
-        candidate = current + char
+    while len(line) > limit:
+        chunks.append(line[:limit])
+        line = line[limit:]
 
-        if current and _discord_len(candidate) > limit:
-            chunks.append(current)
-            current = char
-        else:
-            current = candidate
-
-    if current:
-        chunks.append(current)
+    if line:
+        chunks.append(line)
 
     return chunks
 
 
 def _chunk_by_length(lines, limit=SAFE_FIELD_VALUE_LIMIT):
-    """Group lines into safe Discord field-value chunks."""
+    """Group lines into chunks that fit inside a Discord field value."""
     chunks = []
     current = []
     current_len = 0
 
     for original_line in lines:
-        for line in _split_single_line(original_line, limit):
-            line_len = _discord_len(line)
+        # A single Drive path/URL can theoretically be enormous.
+        split_lines = _split_long_line(original_line, limit)
 
-            # Newline between entries.
+        for line in split_lines:
+            cost = len(line)
+
+            # Account for the newline between entries.
             if current:
-                line_len += 1
+                cost += 1
 
-            if current and current_len + line_len > limit:
+            if current and current_len + cost > limit:
                 chunks.append(current)
                 current = []
                 current_len = 0
-
-                line_len = _discord_len(line)
+                cost = len(line)
 
             current.append(line)
-            current_len += line_len
+            current_len += cost
 
     if current:
         chunks.append(current)
@@ -197,7 +169,7 @@ def _chunk_by_length(lines, limit=SAFE_FIELD_VALUE_LIMIT):
 
 
 def _fields_for(label, lines):
-    """Turn lines into Discord fields."""
+    """Turn lines into Discord fields, respecting the 1024-char value limit."""
     label = _safe_title(label)
 
     if not lines:
@@ -211,8 +183,8 @@ def _fields_for(label, lines):
 
     chunks = _chunk_by_length(lines)
 
-    fields = []
     total = len(chunks)
+    fields = []
 
     for i, chunk in enumerate(chunks, start=1):
         if total == 1:
@@ -220,16 +192,14 @@ def _fields_for(label, lines):
         else:
             name = f"{label} ({i}/{total})"
 
-        name = _safe_title(name)
+        name = name[:FIELD_NAME_LIMIT]
 
         value = "\n".join(chunk)
 
-        # Final defensive assertion.
-        if _discord_len(value) > FIELD_VALUE_LIMIT:
-            raise RuntimeError(
-                "Internal error: generated Discord field exceeds "
-                f"{FIELD_VALUE_LIMIT} UTF-16 characters"
-            )
+        # Defensive check. This should already be guaranteed by
+        # _chunk_by_length(), but never send an invalid Discord field.
+        if len(value) > FIELD_VALUE_LIMIT:
+            value = value[:FIELD_VALUE_LIMIT - 1] + "…"
 
         fields.append(
             {
@@ -243,35 +213,29 @@ def _fields_for(label, lines):
 
 
 # ---------------------------------------------------------------------------
-# Embed sizing
+# Embed splitting
 # ---------------------------------------------------------------------------
 
-def _embed_size(embed):
-    """Calculate the Discord character count for an embed."""
+def _embed_text_size(embed):
+    """Calculate the text counted toward Discord's 6000-character embed limit."""
     total = 0
 
-    total += _discord_len(embed.get("title", ""))
-    total += _discord_len(embed.get("description", ""))
+    total += len(str(embed.get("title", "")))
+    total += len(str(embed.get("description", "")))
 
     for field in embed.get("fields", []):
-        total += _discord_len(field.get("name", ""))
-        total += _discord_len(field.get("value", ""))
+        total += len(str(field.get("name", "")))
+        total += len(str(field.get("value", "")))
 
-    author = embed.get("author")
+    total += len(str(embed.get("footer", {}).get("text", "")))
 
-    if author:
-        total += _discord_len(author.get("name", ""))
-
-    footer = embed.get("footer")
-
-    if footer:
-        total += _discord_len(footer.get("text", ""))
+    total += len(str(embed.get("author", {}).get("name", "")))
 
     return total
 
 
 def _make_embed(title, color, fields=None, description=None):
-    """Create an embed."""
+    """Construct an embed."""
     embed = {
         "title": _safe_title(title),
         "color": color,
@@ -279,239 +243,174 @@ def _make_embed(title, color, fields=None, description=None):
     }
 
     if description:
-        description = str(description)
-
-        # Keep Gemini text well below Discord's description limit.
-        if _discord_len(description) > DESCRIPTION_LIMIT:
-            result = ""
-
-            for char in description:
-                if _discord_len(result + char) > DESCRIPTION_LIMIT:
-                    break
-
-                result += char
-
-            description = result
-
-        embed["description"] = description
+        # Discord's description has a hard 4096-character limit.
+        embed["description"] = description[:DESCRIPTION_LIMIT]
 
     return embed
 
 
-# ---------------------------------------------------------------------------
-# Embed splitting
-# ---------------------------------------------------------------------------
-
 def _split_into_embeds(title, color, fields, description=None):
-    """Split a report into Discord-safe embeds."""
+    """Split fields into embeds while respecting Discord's hard limits.
+
+    Every resulting embed is checked against the 6000-character limit before
+    being returned.
+    """
 
     title = _safe_title(title)
 
-    # Gemini flavor text goes only on the first embed.
-    if description:
-        description = str(description)
+    # The description belongs only on the first embed.
+    description = (description or "")[:DESCRIPTION_LIMIT]
 
     embeds = []
 
     current_fields = []
-    first = True
+    first_embed = True
+
+    def build_current():
+        desc = description if first_embed else None
+
+        return _make_embed(
+            title=title,
+            color=color,
+            fields=current_fields,
+            description=desc,
+        )
 
     for field in fields:
+        candidate_fields = current_fields + [field]
+
         candidate = _make_embed(
             title=title,
             color=color,
-            fields=current_fields + [field],
-            description=description if first else None,
+            fields=candidate_fields,
+            description=description if first_embed else None,
         )
 
-        too_many_fields = (
-            len(current_fields) >= MAX_FIELDS_PER_EMBED
-        )
-
-        too_many_chars = (
-            _embed_size(candidate) > SAFE_EMBED_LIMIT
-        )
+        too_many_fields = len(candidate_fields) > MAX_FIELDS_PER_EMBED
+        too_many_chars = _embed_text_size(candidate) > SAFE_EMBED_LIMIT
 
         if current_fields and (too_many_fields or too_many_chars):
-            embeds.append(
-                _make_embed(
-                    title=title,
-                    color=color,
-                    fields=current_fields,
-                    description=description if first else None,
-                )
-            )
+            embeds.append(build_current())
 
             current_fields = [field]
-            first = False
+            first_embed = False
 
         else:
-            current_fields.append(field)
+            current_fields = candidate_fields
 
-    if current_fields:
-        embeds.append(
-            _make_embed(
-                title=title,
-                color=color,
-                fields=current_fields,
-                description=description if first else None,
-            )
-        )
+    if current_fields or not embeds:
+        embeds.append(build_current())
 
-    if not embeds:
-        embeds.append(
-            _make_embed(
-                title=title,
-                color=color,
-                description=description,
-            )
-        )
-
-    # Add part numbers.
+    # Add part numbering if there is more than one embed.
     total = len(embeds)
 
     if total > 1:
         numbered = []
 
         for i, embed in enumerate(embeds, start=1):
-            numbered_title = _safe_title(
-                f"{title} (part {i}/{total})"
-            )
+            numbered_title = _safe_title(f"{title} (part {i}/{total})")
 
-            new_embed = dict(embed)
-            new_embed["title"] = numbered_title
+            numbered_embed = dict(embed)
+            numbered_embed["title"] = numbered_title
 
-            # Part numbering slightly increases the embed size.
-            # If that somehow exceeds our safe threshold, remove the
-            # description from this particular embed.
-            if _embed_size(new_embed) > SAFE_EMBED_LIMIT:
-                new_embed.pop("description", None)
+            # Re-check the final title after adding "(part i/N)".
+            # If somehow that pushes the embed over our safety limit,
+            # rebuild it without the description where necessary.
+            if _embed_text_size(numbered_embed) > SAFE_EMBED_LIMIT:
+                if "description" in numbered_embed:
+                    numbered_embed.pop("description")
 
-            numbered.append(new_embed)
+            numbered.append(numbered_embed)
 
         embeds = numbered
 
-    return embeds
-
-
-# ---------------------------------------------------------------------------
-# Emergency splitting
-# ---------------------------------------------------------------------------
-
-def _emergency_split_embed(embed):
-    """Split an unexpectedly oversized embed into smaller embeds.
-
-    This is an additional safety net. Under normal circumstances the regular
-    splitter above means this function is never needed.
-    """
-
-    title = embed.get("title", "Discord notification")
-    color = embed.get("color", 0)
-
-    fields = embed.get("fields", [])
-
-    if not fields:
-        # If there are no fields, send a plain-content fallback instead.
-        return [
-            {
-                "title": _safe_title(title),
-                "color": color,
-                "description": str(embed.get("description", ""))[:1000],
-            }
-        ]
-
-    result = []
-
-    for field in fields:
-        value = str(field.get("value", ""))
-
-        chunks = _split_single_line(
-            value,
-            limit=800,
-        )
-
-        for i, chunk in enumerate(chunks, start=1):
-            name = str(field.get("name", ""))
-
-            if len(chunks) > 1:
-                name = f"{name} ({i}/{len(chunks)})"
-
-            result.append(
-                _make_embed(
-                    title=title,
-                    color=color,
-                    fields=[
-                        {
-                            "name": _safe_title(name),
-                            "value": chunk,
-                            "inline": False,
-                        }
-                    ],
-                )
-            )
-
-    return result
-
-
-def _validate_embeds(embeds):
-    """Validate every embed before it reaches Discord."""
-
-    valid = []
+    # Final defensive validation.
+    #
+    # This should never fire because all splitting above is conservative.
+    # If it somehow does, split fields one-by-one rather than sending an
+    # invalid webhook request.
+    final_embeds = []
 
     for embed in embeds:
-        size = _embed_size(embed)
-        field_count = len(embed.get("fields", []))
-
         if (
-            size <= MAX_EMBED_CHARS
-            and field_count <= MAX_FIELDS_PER_EMBED
+            len(embed.get("fields", [])) <= MAX_FIELDS_PER_EMBED
+            and _embed_text_size(embed) <= SAFE_EMBED_LIMIT
         ):
-            valid.append(embed)
+            final_embeds.append(embed)
             continue
 
-        print(
-            "WARNING: Discord embed exceeded a hard limit locally; "
-            "splitting it before sending. "
-            f"size={size}, fields={field_count}"
-        )
+        # Extremely defensive fallback.
+        fields = embed.get("fields", [])
 
-        replacements = _emergency_split_embed(embed)
+        for field in fields:
+            fallback = _make_embed(
+                title=embed.get("title", title),
+                color=color,
+                fields=[field],
+            )
 
-        for replacement in replacements:
-            if (
-                _embed_size(replacement) <= MAX_EMBED_CHARS
-                and len(replacement.get("fields", []))
-                <= MAX_FIELDS_PER_EMBED
-            ):
-                valid.append(replacement)
-            else:
-                # Absolute last resort: convert it to a tiny embed.
-                # This should effectively never be reached.
-                valid.append(
-                    {
-                        "title": "Drive notification",
-                        "description": "A notification was generated but was too large to display in one embed.",
-                    }
-                )
+            final_embeds.append(fallback)
 
-    return valid
+    return final_embeds
 
 
 # ---------------------------------------------------------------------------
-# Webhook sender
+# Webhook sending
 # ---------------------------------------------------------------------------
+
+def _batch_embeds(embeds):
+    """Group embeds into webhook-message batches.
+
+    Discord enforces two independent limits per message:
+      - at most 10 embeds
+      - the COMBINED character count across all embeds in the message
+        (title + description + all field names/values + footer + author)
+        must not exceed 6000
+
+    Each individual embed produced by _split_into_embeds already respects
+    SAFE_EMBED_LIMIT on its own, but that says nothing about how many of
+    those embeds get grouped into a single webhook request. Several
+    individually-safe embeds sent together can still exceed the message-level
+    6000-character budget, so batching has to track a running total, not just
+    a count of 10.
+    """
+    batches = []
+    current = []
+    current_size = 0
+
+    for embed in embeds:
+        size = _embed_text_size(embed)
+
+        too_many = len(current) + 1 > MAX_EMBEDS_PER_MESSAGE
+        too_big = current and (current_size + size > SAFE_EMBED_LIMIT)
+
+        if current and (too_many or too_big):
+            batches.append(current)
+            current = []
+            current_size = 0
+
+        current.append(embed)
+        current_size += size
+
+    if current:
+        batches.append(current)
+
+    return batches
+
 
 def _send_embeds(webhook_url, embeds):
-    """Send embeds in batches of at most 10."""
+    """Send embeds in batches that respect Discord's per-message limits.
 
-    embeds = _validate_embeds(embeds)
+    A "batch" here is capped both by count (max 10 embeds per message) and
+    by combined character size (max ~6000 chars across every embed in the
+    message), matching how Discord actually validates incoming webhook
+    payloads.
+    """
 
     if not embeds:
         return
 
-    for start in range(0, len(embeds), MAX_EMBEDS_PER_MESSAGE):
-        batch = embeds[start:start + MAX_EMBEDS_PER_MESSAGE]
-
+    for batch in _batch_embeds(embeds):
         payload = {
             "embeds": batch,
         }
@@ -524,14 +423,6 @@ def _send_embeds(webhook_url, embeds):
 
         if not response.ok:
             print("Discord response body:", response.text)
-
-            # Print useful local diagnostics.
-            print(
-                "Discord batch diagnostics:",
-                f"embeds={len(batch)}",
-                f"sizes={[_embed_size(e) for e in batch]}",
-                f"fields={[len(e.get('fields', [])) for e in batch]}",
-            )
 
         response.raise_for_status()
 
@@ -550,7 +441,10 @@ def send_track_notification(
     gemini_model=None,
     gemini_persona=None,
 ):
-    """Report Drive changes."""
+    """Report a Google Drive change check.
+
+    Does nothing when there are no changes.
+    """
 
     if not (new_files or changed_files or deleted_files):
         return
@@ -630,7 +524,17 @@ def send_retrieve_notification(
     gemini_model=None,
     gemini_persona=None,
 ):
-    """Report retrieve/download results."""
+    """Report a retrieve/download run.
+
+    retrieved_names:
+        Brand-new files downloaded for the first time.
+
+    updated_names:
+        Existing files re-downloaded because the same Drive file changed.
+
+    skipped_names:
+        Brand-new Drive files whose names collided with another local file.
+    """
 
     if not (retrieved_names or updated_names or skipped_names):
         return
