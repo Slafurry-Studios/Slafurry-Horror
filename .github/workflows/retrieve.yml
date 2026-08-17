@@ -169,13 +169,30 @@ jobs:
         run: |
           cd /tmp/chore-asset
 
-          if gh pr view chore/asset --repo "${{ github.repository }}" >/dev/null 2>&1; then
-            echo "PR already exists for chore/asset, skipping creation."
+          TITLE="chore(assets): retrieve new drive files"
+          BODY="Automated asset sync from Google Drive.
+
+          Last updated: $(date -u +'%Y-%m-%d %H:%M UTC')"
+
+          OPEN_PR=$(gh pr list \
+            --head chore/asset \
+            --state open \
+            --repo "${{ github.repository }}" \
+            --json number \
+            --jq '.[0].number')
+
+          if [ -n "$OPEN_PR" ]; then
+            echo "Open PR #$OPEN_PR already exists, updating it."
+            gh pr edit "$OPEN_PR" \
+              --title "$TITLE" \
+              --body "$BODY" \
+              --repo "${{ github.repository }}"
           else
+            echo "No open PR found, creating a new one."
             gh pr create \
               --base main \
               --head chore/asset \
-              --title "chore(assets): retrieve new drive files" \
-              --body "Automated asset sync from Google Drive." \
+              --title "$TITLE" \
+              --body "$BODY" \
               --repo "${{ github.repository }}"
           fi
