@@ -13,7 +13,15 @@ permissions:
   contents: write
 
 env:
+  # ============================================================
+  # GENERAL
+  # ============================================================
+
   UNITY_PROJECT_PATH: ${{ vars.UNITY_PROJECT_PATH || '.' }}
+
+  # ============================================================
+  # ITCH.IO
+  # ============================================================
 
   ITCH_USER: ${{ vars.ITCH_USER }}
   ITCH_GAME: ${{ vars.ITCH_GAME }}
@@ -24,9 +32,14 @@ env:
   ITCH_CHANNEL_MAC: ${{ vars.ITCH_CHANNEL_MAC || 'mac' }}
   ITCH_CHANNEL_WEBGL: ${{ vars.ITCH_CHANNEL_WEBGL || 'html5' }}
 
+  # ============================================================
+  # GEMINI
+  # ============================================================
+
   GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-2.5-flash' }}
   GEMINI_PERSONA: ${{ vars.GEMINI_PERSONA || 'You are a laid-back, enthusiastic game release announcer with a light sense of humor.' }}
   GEMINI_LANGUAGE: ${{ vars.GEMINI_LANGUAGE || '' }}
+
 
 jobs:
 
@@ -37,36 +50,54 @@ jobs:
   build:
     name: Build ${{ matrix.name }}
 
-    runs-on: ${{ matrix.runner }}
+    # IMPORTANT:
+    # Semua build sementara menggunakan macOS karena
+    # buildalon/unity-setup@v1 gagal meng-install Unity Hub
+    # pada ubuntu-latest.
+    runs-on: macos-latest
 
     strategy:
       fail-fast: false
 
       matrix:
         include:
+
+          # ------------------------------------------------------
+          # WINDOWS
+          # ------------------------------------------------------
+
           - name: Windows
             target: StandaloneWindows64
-            runner: ubuntu-latest
             artifact: Build-Windows
             output: build/StandaloneWindows64
 
+          # ------------------------------------------------------
+          # LINUX
+          # ------------------------------------------------------
+
           - name: Linux
             target: StandaloneLinux64
-            runner: ubuntu-latest
             artifact: Build-Linux
             output: build/StandaloneLinux64
 
+          # ------------------------------------------------------
+          # MACOS
+          # ------------------------------------------------------
+
           - name: macOS
             target: StandaloneOSX
-            runner: macos-latest
             artifact: Build-macOS
             output: build/StandaloneOSX
 
+          # ------------------------------------------------------
+          # WEBGL
+          # ------------------------------------------------------
+
           - name: WebGL
             target: WebGL
-            runner: ubuntu-latest
             artifact: Build-WebGL
             output: build/WebGL
+
 
     steps:
 
@@ -79,21 +110,31 @@ jobs:
         with:
           lfs: true
 
+
       # ========================================================
-      # CACHE
+      # CACHE UNITY LIBRARY
       # ========================================================
 
       - name: Cache Unity Library
         uses: actions/cache@v4
         with:
           path: ${{ env.UNITY_PROJECT_PATH }}/Library
-          key: Library-${{ matrix.target }}-${{ hashFiles('**/Assets/**', '**/Packages/**', '**/ProjectSettings/**') }}
+
+          key: >-
+            Library-macos-${{ matrix.target }}-
+            ${{ hashFiles(
+              format('{0}/Assets/**', env.UNITY_PROJECT_PATH),
+              format('{0}/Packages/**', env.UNITY_PROJECT_PATH),
+              format('{0}/ProjectSettings/**', env.UNITY_PROJECT_PATH)
+            ) }}
+
           restore-keys: |
-            Library-${{ matrix.target }}-
-            Library-
+            Library-macos-${{ matrix.target }}-
+            Library-macos-
+
 
       # ========================================================
-      # UNITY SETUP
+      # SETUP UNITY
       # ========================================================
 
       - name: Setup Unity
@@ -102,8 +143,9 @@ jobs:
           version-file: ${{ env.UNITY_PROJECT_PATH }}/ProjectSettings/ProjectVersion.txt
           build-targets: ${{ matrix.target }}
 
+
       # ========================================================
-      # UNITY LICENSE
+      # ACTIVATE UNITY LICENSE
       # ========================================================
 
       - name: Activate Unity license
@@ -113,8 +155,40 @@ jobs:
           username: ${{ secrets.UNITY_EMAIL }}
           password: ${{ secrets.UNITY_PASSWORD }}
 
+
       # ========================================================
-      # BUILD
+      # SHOW UNITY VERSION
+      # ========================================================
+
+      - name: Show Unity environment
+        shell: bash
+        run: |
+          echo "========================================"
+          echo "UNITY BUILD ENVIRONMENT"
+          echo "========================================"
+
+          echo ""
+          echo "Target:"
+          echo "${{ matrix.target }}"
+
+          echo ""
+          echo "Runner:"
+          uname -a
+
+          echo ""
+          echo "Project path:"
+          echo "${UNITY_PROJECT_PATH}"
+
+          echo ""
+          echo "Unity project version:"
+          cat "${UNITY_PROJECT_PATH}/ProjectSettings/ProjectVersion.txt"
+
+          echo ""
+          echo "========================================"
+
+
+      # ========================================================
+      # BUILD UNITY PROJECT
       # ========================================================
 
       - name: Build Unity project
@@ -127,33 +201,88 @@ jobs:
             -projectPath "${{ env.UNITY_PROJECT_PATH }}"
             -buildTarget ${{ matrix.target }}
             -executeMethod BuildScript.Build
-            -logFile -
+            -logFile "${{ github.workspace }}/unity-build.log"
+
 
       # ========================================================
-      # VERIFY
+      # SHOW UNITY LOG ON FAILURE
+      # ========================================================
+
+      - name: Diagnose Unity failure
+        if: failure()
+        shell: bash
+        run: |
+          echo "========================================"
+          echo "UNITY BUILD FAILED"
+          echo "========================================"
+
+          if [ -f "${GITHUB_WORKSPACE}/unity-build.log" ]; then
+
+            echo ""
+            echo "========================================"
+            echo "LIKELY ERRORS"
+            echo "========================================"
+
+            grep -n -E \
+              "error CS|error:|Error|Exception|Build failed|BuildScript" \
+              "${GITHUB_WORKSPACE}/unity-build.log" \
+              | tail -150 || true
+
+            echo ""
+            echo "========================================"
+            echo "LAST 250 LOG LINES"
+            echo "========================================"
+
+            tail -250 "${GITHUB_WORKSPACE}/unity-build.log"
+
+          else
+
+            echo "Unity build log was not generated."
+
+          fi
+
+
+      # ========================================================
+      # VERIFY BUILD
       # ========================================================
 
       - name: Verify build output
         shell: bash
         run: |
-          echo "Checking build output..."
+          echo "========================================"
+          echo "VERIFYING BUILD OUTPUT"
+          echo "========================================"
 
           if [ ! -d "${{ matrix.output }}" ]; then
-            echo "::error::Build output not found: ${{ matrix.output }}"
-            echo ""
-            echo "Project contents:"
-            find . -maxdepth 3 -type f | head -200
+
+            echo "::error::Build output not found:"
+            echo "${{ matrix.output }}"
 
             echo ""
-            echo "Build directory:"
-            find build -maxdepth 5 -print 2>/dev/null || true
+            echo "========================================"
+            echo "BUILD DIRECTORY"
+            echo "========================================"
+
+            if [ -d build ]; then
+              find build -maxdepth 6 -print
+            else
+              echo "build directory does not exist."
+            fi
 
             exit 1
           fi
 
-          echo ""
           echo "Build output found:"
-          find "${{ matrix.output }}" -maxdepth 4 -type f | head -100
+          echo ""
+
+          find "${{ matrix.output }}" \
+            -maxdepth 6 \
+            -type f \
+            | head -200
+
+          echo ""
+          echo "Build verification successful."
+
 
       # ========================================================
       # UPLOAD ARTIFACT
@@ -168,6 +297,7 @@ jobs:
           retention-days: 7
 
 
+
   # ============================================================
   # DEPLOY TO ITCH.IO
   # ============================================================
@@ -175,7 +305,8 @@ jobs:
   deploy:
     name: Deploy to itch.io
 
-    needs: build
+    needs:
+      - build
 
     runs-on: ubuntu-latest
 
@@ -183,6 +314,10 @@ jobs:
       version: ${{ steps.version.outputs.value }}
 
     steps:
+
+      # ========================================================
+      # RESOLVE VERSION
+      # ========================================================
 
       - name: Resolve version
         id: version
@@ -196,10 +331,14 @@ jobs:
 
           echo "value=${VERSION}" >> "$GITHUB_OUTPUT"
 
-          echo "Deployment version: ${VERSION}"
+          echo "========================================"
+          echo "DEPLOYMENT VERSION"
+          echo "========================================"
+          echo "${VERSION}"
+
 
       # ========================================================
-      # DOWNLOAD BUILDS
+      # DOWNLOAD WINDOWS
       # ========================================================
 
       - name: Download Windows build
@@ -208,11 +347,21 @@ jobs:
           name: Build-Windows
           path: builds/windows
 
+
+      # ========================================================
+      # DOWNLOAD LINUX
+      # ========================================================
+
       - name: Download Linux build
         uses: actions/download-artifact@v4
         with:
           name: Build-Linux
           path: builds/linux
+
+
+      # ========================================================
+      # DOWNLOAD MACOS
+      # ========================================================
 
       - name: Download macOS build
         uses: actions/download-artifact@v4
@@ -220,41 +369,58 @@ jobs:
           name: Build-macOS
           path: builds/macos
 
+
+      # ========================================================
+      # DOWNLOAD WEBGL
+      # ========================================================
+
       - name: Download WebGL build
         uses: actions/download-artifact@v4
         with:
           name: Build-WebGL
           path: builds/webgl
 
+
       # ========================================================
-      # VERIFY DOWNLOADED BUILDS
+      # SHOW DOWNLOADED BUILDS
       # ========================================================
 
       - name: Show downloaded builds
         shell: bash
         run: |
-          echo "================ WINDOWS ================"
-          find builds/windows -maxdepth 5 -type f
+          echo "========================================"
+          echo "WINDOWS"
+          echo "========================================"
+          find builds/windows -maxdepth 6 -print
 
           echo ""
-          echo "================ LINUX =================="
-          find builds/linux -maxdepth 5 -type f
+          echo "========================================"
+          echo "LINUX"
+          echo "========================================"
+          find builds/linux -maxdepth 6 -print
 
           echo ""
-          echo "================ MACOS =================="
-          find builds/macos -maxdepth 5 -type f
+          echo "========================================"
+          echo "MACOS"
+          echo "========================================"
+          find builds/macos -maxdepth 6 -print
 
           echo ""
-          echo "================ WEBGL =================="
-          find builds/webgl -maxdepth 5 -type f
+          echo "========================================"
+          echo "WEBGL"
+          echo "========================================"
+          find builds/webgl -maxdepth 6 -print
+
 
       # ========================================================
-      # BUTLER
+      # INSTALL BUTLER
       # ========================================================
 
       - name: Install Butler
         shell: bash
         run: |
+          set -e
+
           curl -L \
             -o butler.zip \
             https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default
@@ -265,8 +431,16 @@ jobs:
 
           echo "${GITHUB_WORKSPACE}/butler" >> "$GITHUB_PATH"
 
+
+      # ========================================================
+      # VERIFY BUTLER
+      # ========================================================
+
       - name: Verify Butler
-        run: butler -V
+        shell: bash
+        run: |
+          butler -V
+
 
       # ========================================================
       # PUSH WINDOWS
@@ -275,11 +449,15 @@ jobs:
       - name: Push Windows to itch.io
         env:
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+        shell: bash
         run: |
+          set -e
+
           butler push \
             builds/windows \
             "${ITCH_USER}/${ITCH_GAME}:${ITCH_CHANNEL_WINDOWS}" \
             --userversion "${{ steps.version.outputs.value }}"
+
 
       # ========================================================
       # PUSH LINUX
@@ -288,11 +466,15 @@ jobs:
       - name: Push Linux to itch.io
         env:
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+        shell: bash
         run: |
+          set -e
+
           butler push \
             builds/linux \
             "${ITCH_USER}/${ITCH_GAME}:${ITCH_CHANNEL_LINUX}" \
             --userversion "${{ steps.version.outputs.value }}"
+
 
       # ========================================================
       # PUSH MACOS
@@ -301,11 +483,15 @@ jobs:
       - name: Push macOS to itch.io
         env:
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+        shell: bash
         run: |
+          set -e
+
           butler push \
             builds/macos \
             "${ITCH_USER}/${ITCH_GAME}:${ITCH_CHANNEL_MAC}" \
             --userversion "${{ steps.version.outputs.value }}"
+
 
       # ========================================================
       # PUSH WEBGL
@@ -314,11 +500,15 @@ jobs:
       - name: Push WebGL to itch.io
         env:
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+        shell: bash
         run: |
+          set -e
+
           butler push \
             builds/webgl \
             "${ITCH_USER}/${ITCH_GAME}:${ITCH_CHANNEL_WEBGL}" \
             --userversion "${{ steps.version.outputs.value }}"
+
 
 
   # ============================================================
@@ -338,11 +528,20 @@ jobs:
 
     steps:
 
+      # ========================================================
+      # DOWNLOAD WINDOWS
+      # ========================================================
+
       - name: Download Windows build
         uses: actions/download-artifact@v4
         with:
           name: Build-Windows
           path: builds/Windows
+
+
+      # ========================================================
+      # DOWNLOAD LINUX
+      # ========================================================
 
       - name: Download Linux build
         uses: actions/download-artifact@v4
@@ -350,17 +549,28 @@ jobs:
           name: Build-Linux
           path: builds/Linux
 
+
+      # ========================================================
+      # DOWNLOAD MACOS
+      # ========================================================
+
       - name: Download macOS build
         uses: actions/download-artifact@v4
         with:
           name: Build-macOS
           path: builds/macOS
 
+
+      # ========================================================
+      # DOWNLOAD WEBGL
+      # ========================================================
+
       - name: Download WebGL build
         uses: actions/download-artifact@v4
         with:
           name: Build-WebGL
           path: builds/WebGL
+
 
       # ========================================================
       # ZIP BUILDS
@@ -369,6 +579,8 @@ jobs:
       - name: Zip platform builds
         shell: bash
         run: |
+          set -e
+
           cd builds
 
           zip -r "../${{ inputs.release_tag }}-Windows.zip" Windows
@@ -376,8 +588,9 @@ jobs:
           zip -r "../${{ inputs.release_tag }}-macOS.zip" macOS
           zip -r "../${{ inputs.release_tag }}-WebGL.zip" WebGL
 
+
       # ========================================================
-      # CREATE RELEASE
+      # CREATE GITHUB RELEASE
       # ========================================================
 
       - name: Create GitHub Release
@@ -392,8 +605,9 @@ jobs:
           prerelease: false
 
 
+
   # ============================================================
-  # DISCORD
+  # DISCORD NOTIFICATION
   # ============================================================
 
   notify:
@@ -409,7 +623,7 @@ jobs:
     steps:
 
       # ========================================================
-      # GEMINI
+      # GENERATE GEMINI MESSAGE
       # ========================================================
 
       - name: Generate flavor text with Gemini
@@ -422,6 +636,8 @@ jobs:
         shell: bash
 
         run: |
+          set -e
+
           if [ -n "${GEMINI_LANGUAGE}" ]; then
             LANGUAGE_INSTRUCTION="Write the response in ${GEMINI_LANGUAGE}."
           else
@@ -459,6 +675,7 @@ jobs:
 
           if [ -z "$TEXT" ]; then
             echo "Gemini failed."
+            echo ""
             echo "Raw response:"
             echo "$RESPONSE"
 
@@ -471,8 +688,9 @@ jobs:
             echo "GEMINI_EOF"
           } >> "$GITHUB_OUTPUT"
 
+
       # ========================================================
-      # DISCORD
+      # SEND DISCORD
       # ========================================================
 
       - name: Send Discord notification
@@ -485,6 +703,8 @@ jobs:
         shell: bash
 
         run: |
+          set -e
+
           ITCH_URL="https://${ITCH_USER}.itch.io/${ITCH_GAME}"
 
           PAYLOAD=$(jq -n \
