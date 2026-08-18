@@ -1,179 +1,451 @@
+```yaml
 name: Build and Deploy to itch.io
 
 on:
-  push:
-    branches:
-      - main
-    tags:
-      - 'v*'
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Optional release tag, e.g. v1.0.0. Leave empty for normal build."
+        required: false
+        type: string
+        default: ""
 
 permissions:
   contents: write
 
 env:
-  # ── Konfigurasi non-sensitif (bisa juga dipindah ke Settings > Secrets and variables > Actions > Variables) ──
+  # =========================
+  # GENERAL
+  # =========================
+
   UNITY_PROJECT_PATH: ${{ vars.UNITY_PROJECT_PATH || '.' }}
+
+  # =========================
+  # ITCH.IO
+  # =========================
+
   ITCH_USER: ${{ vars.ITCH_USER }}
   ITCH_GAME: ${{ vars.ITCH_GAME }}
   GAME_DISPLAY_NAME: ${{ vars.GAME_DISPLAY_NAME || vars.ITCH_GAME }}
+
   ITCH_CHANNEL_WINDOWS: ${{ vars.ITCH_CHANNEL_WINDOWS || 'windows' }}
   ITCH_CHANNEL_LINUX: ${{ vars.ITCH_CHANNEL_LINUX || 'linux' }}
   ITCH_CHANNEL_MAC: ${{ vars.ITCH_CHANNEL_MAC || 'mac' }}
   ITCH_CHANNEL_WEBGL: ${{ vars.ITCH_CHANNEL_WEBGL || 'html5' }}
+
+  # =========================
+  # GEMINI
+  # =========================
+
   GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-2.5-flash' }}
   GEMINI_PERSONA: ${{ vars.GEMINI_PERSONA || 'You are a laid-back, enthusiastic game release announcer with a light sense of humor.' }}
-  # Kosongkan GEMINI_LANGUAGE kalau mau bahasa mengikuti bahasa dari GEMINI_PERSONA sendiri
   GEMINI_LANGUAGE: ${{ vars.GEMINI_LANGUAGE || '' }}
 
 jobs:
+
+  # ============================================================
+  # BUILD
+  # ============================================================
+
   build:
-    name: Build for ${{ matrix.targetPlatform }}
-    runs-on: ubuntu-latest
+    name: Build ${{ matrix.name }}
+
     strategy:
       fail-fast: false
+
       matrix:
-        targetPlatform:
-          - StandaloneWindows64
-          - StandaloneLinux64
-          - StandaloneOSX
-          - WebGL
+        include:
+
+          - name: Windows
+            target: StandaloneWindows64
+            runner: ubuntu-latest
+            artifact: Build-Windows
+            output: build/StandaloneWindows64
+
+          - name: Linux
+            target: StandaloneLinux64
+            runner: ubuntu-latest
+            artifact: Build-Linux
+            output: build/StandaloneLinux64
+
+          - name: macOS
+            target: StandaloneOSX
+            runner: macos-latest
+            artifact: Build-macOS
+            output: build/StandaloneOSX
+
+          - name: WebGL
+            target: WebGL
+            runner: ubuntu-latest
+            artifact: Build-WebGL
+            output: build/WebGL
+
+    runs-on: ${{ matrix.runner }}
+
     steps:
+
+      # --------------------------------------------------------
+      # CHECKOUT
+      # --------------------------------------------------------
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           lfs: true
 
-      - name: Cache Library folder
+      # --------------------------------------------------------
+      # CACHE UNITY LIBRARY
+      # --------------------------------------------------------
+
+      - name: Cache Unity Library
         uses: actions/cache@v4
         with:
           path: ${{ env.UNITY_PROJECT_PATH }}/Library
-          key: Library-${{ matrix.targetPlatform }}-${{ hashFiles(format('{0}/Assets/**', env.UNITY_PROJECT_PATH), format('{0}/Packages/**', env.UNITY_PROJECT_PATH), format('{0}/ProjectSettings/**', env.UNITY_PROJECT_PATH)) }}
+
+          key: Library-${{ matrix.target }}-${{ hashFiles(
+            format('{0}/Assets/**', env.UNITY_PROJECT_PATH),
+            format('{0}/Packages/**', env.UNITY_PROJECT_PATH),
+            format('{0}/ProjectSettings/**', env.UNITY_PROJECT_PATH)
+          ) }}
+
           restore-keys: |
-            Library-${{ matrix.targetPlatform }}-
+            Library-${{ matrix.target }}-
             Library-
+
+      # --------------------------------------------------------
+      # UNITY SETUP
+      # --------------------------------------------------------
+
+      - name: Setup Unity
+        uses: buildalon/unity-setup@v1
+        with:
+          version-file: ${{ env.UNITY_PROJECT_PATH }}/ProjectSettings/ProjectVersion.txt
+          build-targets: ${{ matrix.target }}
+
+      # --------------------------------------------------------
+      # UNITY LICENSE
+      # --------------------------------------------------------
 
       - name: Activate Unity license
         uses: buildalon/activate-unity-license@v2
         with:
-          license: 'Personal'
+          license: Personal
           username: ${{ secrets.UNITY_EMAIL }}
           password: ${{ secrets.UNITY_PASSWORD }}
 
+      # --------------------------------------------------------
+      # BUILD
+      # --------------------------------------------------------
+
       - name: Build Unity project
-        uses: game-ci/unity-builder@v4
-        env:
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        uses: buildalon/unity-action@v1
         with:
-          projectPath: ${{ env.UNITY_PROJECT_PATH }}
-          targetPlatform: ${{ matrix.targetPlatform }}
+          args: >-
+            -quit
+            -batchmode
+            -nographics
+            -projectPath "${{ env.UNITY_PROJECT_PATH }}"
+            -buildTarget ${{ matrix.target }}
+            -executeMethod BuildScript.Build
+            -logFile -
+
+      # --------------------------------------------------------
+      # VERIFY BUILD
+      # --------------------------------------------------------
+
+      - name: Verify build output
+        shell: bash
+        run: |
+          echo "Checking build output..."
+
+          if [ ! -d "${{ matrix.output }}" ]; then
+            echo "::error::Build output not found: ${{ matrix.output }}"
+            echo ""
+            echo "Contents of build directory:"
+            find build -maxdepth 4 -print 2>/dev/null || true
+            exit 1
+          fi
+
+          echo "Build output found:"
+          find "${{ matrix.output }}" -maxdepth 3 -type f | head -100
+
+      # --------------------------------------------------------
+      # UPLOAD ARTIFACT
+      # --------------------------------------------------------
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Build-${{ matrix.targetPlatform }}
-          path: build/${{ matrix.targetPlatform }}
-          retention-days: 3
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.output }}
+          if-no-files-found: error
+          retention-days: 7
+
+
+  # ============================================================
+  # DEPLOY
+  # ============================================================
 
   deploy:
     name: Deploy to itch.io
     needs: build
     runs-on: ubuntu-latest
+
     outputs:
       version: ${{ steps.version.outputs.value }}
+
     steps:
-      - name: Checkout repository (untuk versi/tag)
+
+      # --------------------------------------------------------
+      # CHECKOUT
+      # --------------------------------------------------------
+
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Resolve version string
+      # --------------------------------------------------------
+      # RESOLVE VERSION
+      # --------------------------------------------------------
+
+      - name: Resolve version
         id: version
+        shell: bash
         run: |
-          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
-            echo "value=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          if [ -n "${{ inputs.release_tag }}" ]; then
+            VERSION="${{ inputs.release_tag }}"
           else
-            echo "value=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+            VERSION="${GITHUB_SHA::7}"
           fi
 
-      - name: Download all build artifacts
+          echo "value=${VERSION}" >> "$GITHUB_OUTPUT"
+
+          echo "Deployment version:"
+          echo "${VERSION}"
+
+      # --------------------------------------------------------
+      # DOWNLOAD BUILDS
+      # --------------------------------------------------------
+
+      - name: Download Windows build
         uses: actions/download-artifact@v4
         with:
-          path: builds
+          name: Build-Windows
+          path: builds/windows
 
-      - name: Install Butler (itch.io CLI)
+      - name: Download Linux build
+        uses: actions/download-artifact@v4
+        with:
+          name: Build-Linux
+          path: builds/linux
+
+      - name: Download macOS build
+        uses: actions/download-artifact@v4
+        with:
+          name: Build-macOS
+          path: builds/macos
+
+      - name: Download WebGL build
+        uses: actions/download-artifact@v4
+        with:
+          name: Build-WebGL
+          path: builds/webgl
+
+      # --------------------------------------------------------
+      # SHOW BUILDS
+      # --------------------------------------------------------
+
+      - name: Show downloaded builds
         run: |
-          curl -L -o butler.zip https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default
-          unzip butler.zip -d butler
+          echo "================ WINDOWS ================"
+          find builds/windows -maxdepth 4 -type f | head -100
+
+          echo "================ LINUX =================="
+          find builds/linux -maxdepth 4 -type f | head -100
+
+          echo "================ MACOS =================="
+          find builds/macos -maxdepth 4 -type f | head -100
+
+          echo "================ WEBGL =================="
+          find builds/webgl -maxdepth 4 -type f | head -100
+
+      # --------------------------------------------------------
+      # BUTLER
+      # --------------------------------------------------------
+
+      - name: Install Butler
+        shell: bash
+        run: |
+          curl -L \
+            -o butler.zip \
+            https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default
+
+          unzip -o butler.zip -d butler
+
           chmod +x butler/butler
-          echo "$(pwd)/butler" >> $GITHUB_PATH
+
+          echo "${GITHUB_WORKSPACE}/butler" >> "$GITHUB_PATH"
 
       - name: Verify Butler
-        run: butler -V
+        run: |
+          butler -V
 
-      - name: Push Windows build
+      # --------------------------------------------------------
+      # ITCH.IO WINDOWS
+      # --------------------------------------------------------
+
+      - name: Push Windows to itch.io
         env:
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
-        run: butler push builds/Build-StandaloneWindows64 "${{ env.ITCH_USER }}/${{ env.ITCH_GAME }}:${{ env.ITCH_CHANNEL_WINDOWS }}" --userversion "${{ steps.version.outputs.value }}"
+        run: |
+          butler push \
+            builds/windows \
+            "${ITCH_USER}/${ITCH_GAME}:${ITCH_CHANNEL_WINDOWS}" \
+            --userversion "${{ steps.version.outputs.value }}"
 
-      - name: Push Linux build
+      # --------------------------------------------------------
+      # ITCH.IO LINUX
+      # --------------------------------------------------------
+
+      - name: Push Linux to itch.io
         env:
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
-        run: butler push builds/Build-StandaloneLinux64 "${{ env.ITCH_USER }}/${{ env.ITCH_GAME }}:${{ env.ITCH_CHANNEL_LINUX }}" --userversion "${{ steps.version.outputs.value }}"
+        run: |
+          butler push \
+            builds/linux \
+            "${ITCH_USER}/${ITCH_GAME}:${ITCH_CHANNEL_LINUX}" \
+            --userversion "${{ steps.version.outputs.value }}"
 
-      - name: Push macOS build
+      # --------------------------------------------------------
+      # ITCH.IO MACOS
+      # --------------------------------------------------------
+
+      - name: Push macOS to itch.io
         env:
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
-        run: butler push builds/Build-StandaloneOSX "${{ env.ITCH_USER }}/${{ env.ITCH_GAME }}:${{ env.ITCH_CHANNEL_MAC }}" --userversion "${{ steps.version.outputs.value }}"
+        run: |
+          butler push \
+            builds/macos \
+            "${ITCH_USER}/${ITCH_GAME}:${ITCH_CHANNEL_MAC}" \
+            --userversion "${{ steps.version.outputs.value }}"
 
-      - name: Push WebGL build
+      # --------------------------------------------------------
+      # ITCH.IO WEBGL
+      # --------------------------------------------------------
+
+      - name: Push WebGL to itch.io
         env:
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
-        run: butler push builds/Build-WebGL "${{ env.ITCH_USER }}/${{ env.ITCH_GAME }}:${{ env.ITCH_CHANNEL_WEBGL }}" --userversion "${{ steps.version.outputs.value }}"
+        run: |
+          butler push \
+            builds/webgl \
+            "${ITCH_USER}/${ITCH_GAME}:${ITCH_CHANNEL_WEBGL}" \
+            --userversion "${{ steps.version.outputs.value }}"
+
+
+  # ============================================================
+  # GITHUB RELEASE
+  # ============================================================
 
   github-release:
     name: Publish GitHub Release
-    needs: build
+    needs:
+      - build
+      - deploy
+
+    if: inputs.release_tag != ''
+
     runs-on: ubuntu-latest
-    # Hanya jalan kalau workflow dipicu oleh tag versi (contoh: v1.0.0)
-    if: startsWith(github.ref, 'refs/tags/v')
+
     steps:
-      - name: Download all build artifacts
+
+      # --------------------------------------------------------
+      # DOWNLOAD BUILDS
+      # --------------------------------------------------------
+
+      - name: Download Windows build
         uses: actions/download-artifact@v4
         with:
-          path: builds
+          name: Build-Windows
+          path: builds/Windows
 
-      - name: Zip each platform build
+      - name: Download Linux build
+        uses: actions/download-artifact@v4
+        with:
+          name: Build-Linux
+          path: builds/Linux
+
+      - name: Download macOS build
+        uses: actions/download-artifact@v4
+        with:
+          name: Build-macOS
+          path: builds/macOS
+
+      - name: Download WebGL build
+        uses: actions/download-artifact@v4
+        with:
+          name: Build-WebGL
+          path: builds/WebGL
+
+      # --------------------------------------------------------
+      # ZIP
+      # --------------------------------------------------------
+
+      - name: Zip platform builds
+        shell: bash
         run: |
           cd builds
-          for dir in */ ; do
-            name="${dir%/}"
-            zip -r "../${name}.zip" "$dir"
-          done
 
-      - name: Create GitHub Release with build assets
+          zip -r "../${{ inputs.release_tag }}-Windows.zip" Windows
+          zip -r "../${{ inputs.release_tag }}-Linux.zip" Linux
+          zip -r "../${{ inputs.release_tag }}-macOS.zip" macOS
+          zip -r "../${{ inputs.release_tag }}-WebGL.zip" WebGL
+
+      # --------------------------------------------------------
+      # RELEASE
+      # --------------------------------------------------------
+
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ inputs.release_tag }}
+          name: ${{ inputs.release_tag }}
           files: |
             *.zip
           generate_release_notes: true
           draft: false
           prerelease: false
 
+
+  # ============================================================
+  # DISCORD
+  # ============================================================
+
   notify:
     name: Notify Discord
-    needs: [deploy]
+    needs:
+      - deploy
+
+    if: needs.deploy.result == 'success'
+
     runs-on: ubuntu-latest
-    if: always() && needs.deploy.result == 'success'
+
     steps:
+
+      # --------------------------------------------------------
+      # GEMINI
+      # --------------------------------------------------------
+
       - name: Generate flavor text with Gemini
         id: flavor
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           VERSION: ${{ needs.deploy.outputs.version }}
+
+        shell: bash
+
         run: |
-          LANGUAGE_INSTRUCTION=""
           if [ -n "${GEMINI_LANGUAGE}" ]; then
             LANGUAGE_INSTRUCTION="Write the response in ${GEMINI_LANGUAGE}."
           else
@@ -182,20 +454,38 @@ jobs:
 
           PROMPT="${GEMINI_PERSONA}
 
-          Write ONE short paragraph (max 3 sentences, no markdown formatting, no surrounding quotation marks) announcing that a new build of the game \"${GAME_DISPLAY_NAME}\" version ${VERSION} has been successfully deployed to Windows, Linux, macOS, and Web on itch.io. Match the tone and style of the persona above. ${LANGUAGE_INSTRUCTION}"
+          Write ONE short paragraph (maximum 3 sentences, no markdown formatting, no surrounding quotation marks) announcing that a new build of the game \"${GAME_DISPLAY_NAME}\" version ${VERSION} has successfully been deployed to Windows, Linux, macOS, and Web on itch.io.
 
-          BODY=$(jq -n --arg prompt "$PROMPT" '{contents: [{parts: [{text: $prompt}]}]}')
+          Match the tone and style of the persona above.
+          ${LANGUAGE_INSTRUCTION}"
 
-          RESPONSE=$(curl -s -X POST \
+          BODY=$(jq -n \
+            --arg prompt "$PROMPT" \
+            '{
+              contents: [
+                {
+                  parts: [
+                    {
+                      text: $prompt
+                    }
+                  ]
+                }
+              ]
+            }')
+
+          RESPONSE=$(curl -sS -X POST \
             "https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}" \
             -H "Content-Type: application/json" \
             -d "$BODY")
 
-          TEXT=$(echo "$RESPONSE" | jq -r '.candidates[0].content.parts[0].text // empty')
+          TEXT=$(echo "$RESPONSE" | jq -r \
+            '.candidates[0].content.parts[0].text // empty')
 
           if [ -z "$TEXT" ]; then
-            echo "Gemini gagal merespons, fallback ke pesan default. Response mentah:"
+            echo "Gemini failed."
+            echo "Raw response:"
             echo "$RESPONSE"
+
             TEXT="Build baru ${GAME_DISPLAY_NAME} versi ${VERSION} sudah tayang di itch.io!"
           fi
 
@@ -205,11 +495,19 @@ jobs:
             echo "GEMINI_EOF"
           } >> "$GITHUB_OUTPUT"
 
+
+      # --------------------------------------------------------
+      # DISCORD
+      # --------------------------------------------------------
+
       - name: Send Discord notification
         env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL_DEPLOY }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           VERSION: ${{ needs.deploy.outputs.version }}
           FLAVOR_TEXT: ${{ steps.flavor.outputs.text }}
+
+        shell: bash
+
         run: |
           ITCH_URL="https://${ITCH_USER}.itch.io/${ITCH_GAME}"
 
@@ -225,13 +523,33 @@ jobs:
                   description: $content,
                   color: 5814783,
                   fields: [
-                    { name: "Windows", value: "✅", inline: true },
-                    { name: "Linux", value: "✅", inline: true },
-                    { name: "macOS", value: "✅", inline: true },
-                    { name: "Web", value: "✅", inline: true }
+                    {
+                      name: "Windows",
+                      value: "✅",
+                      inline: true
+                    },
+                    {
+                      name: "Linux",
+                      value: "✅",
+                      inline: true
+                    },
+                    {
+                      name: "macOS",
+                      value: "✅",
+                      inline: true
+                    },
+                    {
+                      name: "Web",
+                      value: "✅",
+                      inline: true
+                    }
                   ]
                 }
               ]
             }')
 
-          curl -s -H "Content-Type: application/json" -d "$PAYLOAD" "$DISCORD_WEBHOOK_URL"
+          curl -sS \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" \
+            "$DISCORD_WEBHOOK_URL"
+```
