@@ -89,11 +89,11 @@ jobs:
             output: build/StandaloneOSX
 
           # ------------------------------------------------------
-          # WEBGL (no native toolchain needed, Linux host is cheapest)
+          # WEBGL
           # ------------------------------------------------------
 
           - name: WebGL
-            os: ubuntu-latest
+            os: macos-latest
             target: WebGL
             artifact: Build-WebGL
             output: build/WebGL
@@ -138,7 +138,7 @@ jobs:
       # ========================================================
 
       - name: Setup Unity
-        uses: buildalon/unity-setup@v1
+        uses: buildalon/unity-setup@v2
         with:
           version-file: ${{ env.UNITY_PROJECT_PATH }}/ProjectSettings/ProjectVersion.txt
 
@@ -225,7 +225,7 @@ jobs:
       # ========================================================
 
       - name: Build Unity project
-        uses: buildalon/unity-action@v1
+        uses: buildalon/unity-action@v3
         with:
           args: >-
             -quit
