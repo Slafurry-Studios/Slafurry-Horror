@@ -13,15 +13,7 @@ permissions:
   contents: write
 
 env:
-  # =========================
-  # GENERAL
-  # =========================
-
   UNITY_PROJECT_PATH: ${{ vars.UNITY_PROJECT_PATH || '.' }}
-
-  # =========================
-  # ITCH.IO
-  # =========================
 
   ITCH_USER: ${{ vars.ITCH_USER }}
   ITCH_GAME: ${{ vars.ITCH_GAME }}
@@ -31,10 +23,6 @@ env:
   ITCH_CHANNEL_LINUX: ${{ vars.ITCH_CHANNEL_LINUX || 'linux' }}
   ITCH_CHANNEL_MAC: ${{ vars.ITCH_CHANNEL_MAC || 'mac' }}
   ITCH_CHANNEL_WEBGL: ${{ vars.ITCH_CHANNEL_WEBGL || 'html5' }}
-
-  # =========================
-  # GEMINI
-  # =========================
 
   GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-2.5-flash' }}
   GEMINI_PERSONA: ${{ vars.GEMINI_PERSONA || 'You are a laid-back, enthusiastic game release announcer with a light sense of humor.' }}
@@ -49,12 +37,13 @@ jobs:
   build:
     name: Build ${{ matrix.name }}
 
+    runs-on: ${{ matrix.runner }}
+
     strategy:
       fail-fast: false
 
       matrix:
         include:
-
           - name: Windows
             target: StandaloneWindows64
             runner: ubuntu-latest
@@ -79,41 +68,33 @@ jobs:
             artifact: Build-WebGL
             output: build/WebGL
 
-    runs-on: ${{ matrix.runner }}
-
     steps:
 
-      # --------------------------------------------------------
+      # ========================================================
       # CHECKOUT
-      # --------------------------------------------------------
+      # ========================================================
 
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           lfs: true
 
-      # --------------------------------------------------------
-      # CACHE UNITY LIBRARY
-      # --------------------------------------------------------
+      # ========================================================
+      # CACHE
+      # ========================================================
 
       - name: Cache Unity Library
         uses: actions/cache@v4
         with:
           path: ${{ env.UNITY_PROJECT_PATH }}/Library
-
-          key: Library-${{ matrix.target }}-${{ hashFiles(
-            format('{0}/Assets/**', env.UNITY_PROJECT_PATH),
-            format('{0}/Packages/**', env.UNITY_PROJECT_PATH),
-            format('{0}/ProjectSettings/**', env.UNITY_PROJECT_PATH)
-          ) }}
-
+          key: Library-${{ matrix.target }}-${{ hashFiles('**/Assets/**', '**/Packages/**', '**/ProjectSettings/**') }}
           restore-keys: |
             Library-${{ matrix.target }}-
             Library-
 
-      # --------------------------------------------------------
+      # ========================================================
       # UNITY SETUP
-      # --------------------------------------------------------
+      # ========================================================
 
       - name: Setup Unity
         uses: buildalon/unity-setup@v1
@@ -121,9 +102,9 @@ jobs:
           version-file: ${{ env.UNITY_PROJECT_PATH }}/ProjectSettings/ProjectVersion.txt
           build-targets: ${{ matrix.target }}
 
-      # --------------------------------------------------------
+      # ========================================================
       # UNITY LICENSE
-      # --------------------------------------------------------
+      # ========================================================
 
       - name: Activate Unity license
         uses: buildalon/activate-unity-license@v2
@@ -132,9 +113,9 @@ jobs:
           username: ${{ secrets.UNITY_EMAIL }}
           password: ${{ secrets.UNITY_PASSWORD }}
 
-      # --------------------------------------------------------
+      # ========================================================
       # BUILD
-      # --------------------------------------------------------
+      # ========================================================
 
       - name: Build Unity project
         uses: buildalon/unity-action@v1
@@ -148,9 +129,9 @@ jobs:
             -executeMethod BuildScript.Build
             -logFile -
 
-      # --------------------------------------------------------
-      # VERIFY BUILD
-      # --------------------------------------------------------
+      # ========================================================
+      # VERIFY
+      # ========================================================
 
       - name: Verify build output
         shell: bash
@@ -160,17 +141,23 @@ jobs:
           if [ ! -d "${{ matrix.output }}" ]; then
             echo "::error::Build output not found: ${{ matrix.output }}"
             echo ""
-            echo "Contents of build directory:"
-            find build -maxdepth 4 -print 2>/dev/null || true
+            echo "Project contents:"
+            find . -maxdepth 3 -type f | head -200
+
+            echo ""
+            echo "Build directory:"
+            find build -maxdepth 5 -print 2>/dev/null || true
+
             exit 1
           fi
 
+          echo ""
           echo "Build output found:"
-          find "${{ matrix.output }}" -maxdepth 3 -type f | head -100
+          find "${{ matrix.output }}" -maxdepth 4 -type f | head -100
 
-      # --------------------------------------------------------
+      # ========================================================
       # UPLOAD ARTIFACT
-      # --------------------------------------------------------
+      # ========================================================
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
@@ -182,31 +169,20 @@ jobs:
 
 
   # ============================================================
-  # DEPLOY
+  # DEPLOY TO ITCH.IO
   # ============================================================
 
   deploy:
     name: Deploy to itch.io
+
     needs: build
+
     runs-on: ubuntu-latest
 
     outputs:
       version: ${{ steps.version.outputs.value }}
 
     steps:
-
-      # --------------------------------------------------------
-      # CHECKOUT
-      # --------------------------------------------------------
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      # --------------------------------------------------------
-      # RESOLVE VERSION
-      # --------------------------------------------------------
 
       - name: Resolve version
         id: version
@@ -220,12 +196,11 @@ jobs:
 
           echo "value=${VERSION}" >> "$GITHUB_OUTPUT"
 
-          echo "Deployment version:"
-          echo "${VERSION}"
+          echo "Deployment version: ${VERSION}"
 
-      # --------------------------------------------------------
+      # ========================================================
       # DOWNLOAD BUILDS
-      # --------------------------------------------------------
+      # ========================================================
 
       - name: Download Windows build
         uses: actions/download-artifact@v4
@@ -251,27 +226,31 @@ jobs:
           name: Build-WebGL
           path: builds/webgl
 
-      # --------------------------------------------------------
-      # SHOW BUILDS
-      # --------------------------------------------------------
+      # ========================================================
+      # VERIFY DOWNLOADED BUILDS
+      # ========================================================
 
       - name: Show downloaded builds
+        shell: bash
         run: |
           echo "================ WINDOWS ================"
-          find builds/windows -maxdepth 4 -type f | head -100
+          find builds/windows -maxdepth 5 -type f
 
+          echo ""
           echo "================ LINUX =================="
-          find builds/linux -maxdepth 4 -type f | head -100
+          find builds/linux -maxdepth 5 -type f
 
+          echo ""
           echo "================ MACOS =================="
-          find builds/macos -maxdepth 4 -type f | head -100
+          find builds/macos -maxdepth 5 -type f
 
+          echo ""
           echo "================ WEBGL =================="
-          find builds/webgl -maxdepth 4 -type f | head -100
+          find builds/webgl -maxdepth 5 -type f
 
-      # --------------------------------------------------------
+      # ========================================================
       # BUTLER
-      # --------------------------------------------------------
+      # ========================================================
 
       - name: Install Butler
         shell: bash
@@ -287,12 +266,11 @@ jobs:
           echo "${GITHUB_WORKSPACE}/butler" >> "$GITHUB_PATH"
 
       - name: Verify Butler
-        run: |
-          butler -V
+        run: butler -V
 
-      # --------------------------------------------------------
-      # ITCH.IO WINDOWS
-      # --------------------------------------------------------
+      # ========================================================
+      # PUSH WINDOWS
+      # ========================================================
 
       - name: Push Windows to itch.io
         env:
@@ -303,9 +281,9 @@ jobs:
             "${ITCH_USER}/${ITCH_GAME}:${ITCH_CHANNEL_WINDOWS}" \
             --userversion "${{ steps.version.outputs.value }}"
 
-      # --------------------------------------------------------
-      # ITCH.IO LINUX
-      # --------------------------------------------------------
+      # ========================================================
+      # PUSH LINUX
+      # ========================================================
 
       - name: Push Linux to itch.io
         env:
@@ -316,9 +294,9 @@ jobs:
             "${ITCH_USER}/${ITCH_GAME}:${ITCH_CHANNEL_LINUX}" \
             --userversion "${{ steps.version.outputs.value }}"
 
-      # --------------------------------------------------------
-      # ITCH.IO MACOS
-      # --------------------------------------------------------
+      # ========================================================
+      # PUSH MACOS
+      # ========================================================
 
       - name: Push macOS to itch.io
         env:
@@ -329,9 +307,9 @@ jobs:
             "${ITCH_USER}/${ITCH_GAME}:${ITCH_CHANNEL_MAC}" \
             --userversion "${{ steps.version.outputs.value }}"
 
-      # --------------------------------------------------------
-      # ITCH.IO WEBGL
-      # --------------------------------------------------------
+      # ========================================================
+      # PUSH WEBGL
+      # ========================================================
 
       - name: Push WebGL to itch.io
         env:
@@ -349,6 +327,7 @@ jobs:
 
   github-release:
     name: Publish GitHub Release
+
     needs:
       - build
       - deploy
@@ -358,10 +337,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
-      # --------------------------------------------------------
-      # DOWNLOAD BUILDS
-      # --------------------------------------------------------
 
       - name: Download Windows build
         uses: actions/download-artifact@v4
@@ -387,9 +362,9 @@ jobs:
           name: Build-WebGL
           path: builds/WebGL
 
-      # --------------------------------------------------------
-      # ZIP
-      # --------------------------------------------------------
+      # ========================================================
+      # ZIP BUILDS
+      # ========================================================
 
       - name: Zip platform builds
         shell: bash
@@ -401,9 +376,9 @@ jobs:
           zip -r "../${{ inputs.release_tag }}-macOS.zip" macOS
           zip -r "../${{ inputs.release_tag }}-WebGL.zip" WebGL
 
-      # --------------------------------------------------------
-      # RELEASE
-      # --------------------------------------------------------
+      # ========================================================
+      # CREATE RELEASE
+      # ========================================================
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -423,6 +398,7 @@ jobs:
 
   notify:
     name: Notify Discord
+
     needs:
       - deploy
 
@@ -432,12 +408,13 @@ jobs:
 
     steps:
 
-      # --------------------------------------------------------
+      # ========================================================
       # GEMINI
-      # --------------------------------------------------------
+      # ========================================================
 
       - name: Generate flavor text with Gemini
         id: flavor
+
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           VERSION: ${{ needs.deploy.outputs.version }}
@@ -494,12 +471,12 @@ jobs:
             echo "GEMINI_EOF"
           } >> "$GITHUB_OUTPUT"
 
-
-      # --------------------------------------------------------
+      # ========================================================
       # DISCORD
-      # --------------------------------------------------------
+      # ========================================================
 
       - name: Send Discord notification
+
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           VERSION: ${{ needs.deploy.outputs.version }}
