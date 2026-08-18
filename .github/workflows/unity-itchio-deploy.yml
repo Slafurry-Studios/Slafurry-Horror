@@ -50,10 +50,6 @@ jobs:
   build:
     name: Build ${{ matrix.name }}
 
-    # IMPORTANT:
-    # Semua build sementara menggunakan macOS karena
-    # buildalon/unity-setup@v1 gagal meng-install Unity Hub
-    # pada ubuntu-latest.
     runs-on: macos-latest
 
     strategy:
@@ -134,13 +130,17 @@ jobs:
 
 
       # ========================================================
-      # SETUP UNITY
+      # SETUP UNITY + REQUIRED BUILD MODULE
       # ========================================================
 
       - name: Setup Unity
         uses: buildalon/unity-setup@v1
         with:
           version-file: ${{ env.UNITY_PROJECT_PATH }}/ProjectSettings/ProjectVersion.txt
+
+          # IMPORTANT:
+          # Ask buildalon to install the module required by
+          # the current matrix target.
           build-targets: ${{ matrix.target }}
 
 
@@ -157,12 +157,14 @@ jobs:
 
 
       # ========================================================
-      # SHOW UNITY VERSION
+      # SHOW UNITY ENVIRONMENT
       # ========================================================
 
       - name: Show Unity environment
         shell: bash
         run: |
+          set -e
+
           echo "========================================"
           echo "UNITY BUILD ENVIRONMENT"
           echo "========================================"
@@ -182,6 +184,29 @@ jobs:
           echo ""
           echo "Unity project version:"
           cat "${UNITY_PROJECT_PATH}/ProjectSettings/ProjectVersion.txt"
+
+          echo ""
+          echo "Unity editor:"
+          echo "${UNITY_EDITOR_PATH:-unknown}"
+
+          echo ""
+          echo "========================================"
+          echo "UNITY INSTALLATION"
+          echo "========================================"
+
+          if [ -n "${UNITY_EDITOR_PATH:-}" ] && [ -x "${UNITY_EDITOR_PATH}" ]; then
+            "${UNITY_EDITOR_PATH}" \
+              -batchmode \
+              -quit \
+              -version || true
+          fi
+
+          echo ""
+          echo "========================================"
+          echo "TARGET"
+          echo "========================================"
+
+          echo "${{ matrix.target }}"
 
           echo ""
           echo "========================================"
@@ -216,24 +241,29 @@ jobs:
           echo "UNITY BUILD FAILED"
           echo "========================================"
 
+          echo ""
+          echo "Target:"
+          echo "${{ matrix.target }}"
+
+          echo ""
+
           if [ -f "${GITHUB_WORKSPACE}/unity-build.log" ]; then
 
-            echo ""
             echo "========================================"
             echo "LIKELY ERRORS"
             echo "========================================"
 
             grep -n -E \
-              "error CS|error:|Error|Exception|Build failed|BuildScript" \
+              "error CS|error:|Error|Exception|Build failed|BuildScript|unsupported|not installed|scripting backend" \
               "${GITHUB_WORKSPACE}/unity-build.log" \
-              | tail -150 || true
+              | tail -200 || true
 
             echo ""
             echo "========================================"
-            echo "LAST 250 LOG LINES"
+            echo "LAST 300 LOG LINES"
             echo "========================================"
 
-            tail -250 "${GITHUB_WORKSPACE}/unity-build.log"
+            tail -300 "${GITHUB_WORKSPACE}/unity-build.log"
 
           else
 
