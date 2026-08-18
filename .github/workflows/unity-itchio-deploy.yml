@@ -734,7 +734,7 @@ jobs:
       - name: Send Discord notification
 
         env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL_DEPLOY }}
           VERSION: ${{ needs.deploy.outputs.version }}
           FLAVOR_TEXT: ${{ steps.flavor.outputs.text }}
           PLATFORMS_INPUT: ${{ inputs.platforms }}
