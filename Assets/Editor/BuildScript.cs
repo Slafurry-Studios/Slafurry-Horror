@@ -22,8 +22,6 @@ public static class BuildScript
             return;
         }
 
-        string outputPath = GetOutputPath(target);
-
         string[] scenes = EditorBuildSettings.scenes
             .Where(scene => scene.enabled)
             .Select(scene => scene.path)
@@ -33,20 +31,31 @@ public static class BuildScript
         {
             Fail(
                 "No enabled scenes found in Build Settings. " +
-                "Add your scenes in File > Build Profiles/Build Settings."
+                "Add your scenes through File > Build Settings."
             );
             return;
         }
 
-        Directory.CreateDirectory("build");
+        string productName = PlayerSettings.productName;
 
-        if (target != BuildTarget.WebGL)
+        if (string.IsNullOrWhiteSpace(productName))
         {
-            Directory.CreateDirectory(outputPath);
+            productName = "Game";
+        }
+
+        string outputPath = GetOutputPath(target, productName);
+
+        string outputDirectory = Path.GetDirectoryName(outputPath);
+
+        if (!string.IsNullOrEmpty(outputDirectory))
+        {
+            Directory.CreateDirectory(outputDirectory);
         }
 
         UnityEngine.Debug.Log("========================================");
-        UnityEngine.Debug.Log($"Unity Build Target : {target}");
+        UnityEngine.Debug.Log($"Game               : {productName}");
+        UnityEngine.Debug.Log($"Unity Version      : {Application.unityVersion}");
+        UnityEngine.Debug.Log($"Build Target       : {target}");
         UnityEngine.Debug.Log($"Output             : {outputPath}");
         UnityEngine.Debug.Log($"Scenes             : {scenes.Length}");
         UnityEngine.Debug.Log("========================================");
@@ -73,39 +82,45 @@ public static class BuildScript
 
         UnityEngine.Debug.Log("========================================");
         UnityEngine.Debug.Log("BUILD SUCCEEDED");
-        UnityEngine.Debug.Log($"Target: {target}");
+        UnityEngine.Debug.Log($"Game   : {productName}");
+        UnityEngine.Debug.Log($"Target : {target}");
         UnityEngine.Debug.Log(
-            $"Size: {report.summary.totalSize / (1024f * 1024f):F2} MB"
+            $"Size   : {report.summary.totalSize / (1024f * 1024f):F2} MB"
         );
-        UnityEngine.Debug.Log($"Output: {outputPath}");
+        UnityEngine.Debug.Log($"Output : {outputPath}");
         UnityEngine.Debug.Log("========================================");
 
         EditorApplication.Exit(0);
     }
 
-    private static string GetOutputPath(BuildTarget target)
+    private static string GetOutputPath(
+        BuildTarget target,
+        string productName
+    )
     {
+        string safeName = SanitizeFileName(productName);
+
         switch (target)
         {
             case BuildTarget.StandaloneWindows64:
                 return Path.Combine(
                     "build",
                     "StandaloneWindows64",
-                    "Game.exe"
+                    safeName + ".exe"
                 );
 
             case BuildTarget.StandaloneLinux64:
                 return Path.Combine(
                     "build",
                     "StandaloneLinux64",
-                    "Game.x86_64"
+                    safeName + ".x86_64"
                 );
 
             case BuildTarget.StandaloneOSX:
                 return Path.Combine(
                     "build",
                     "StandaloneOSX",
-                    "Game.app"
+                    safeName + ".app"
                 );
 
             case BuildTarget.WebGL:
@@ -119,6 +134,19 @@ public static class BuildScript
                     $"Unsupported build target: {target}"
                 );
         }
+    }
+
+    private static string SanitizeFileName(string fileName)
+    {
+        foreach (char invalidChar in Path.GetInvalidFileNameChars())
+        {
+            fileName = fileName.Replace(
+                invalidChar.ToString(),
+                ""
+            );
+        }
+
+        return fileName.Trim();
     }
 
     private static string GetArgument(string argumentName)
