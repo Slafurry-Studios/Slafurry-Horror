@@ -73,7 +73,7 @@ jobs:
           # ------------------------------------------------------
 
           - name: Linux
-            os: ubuntu-latest
+            os: ubuntu-22.04
             target: StandaloneLinux64
             artifact: Build-Linux
             output: build/StandaloneLinux64
