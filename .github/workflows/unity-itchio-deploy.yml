@@ -3,6 +3,16 @@ name: Build and Deploy to itch.io
 on:
   workflow_dispatch:
     inputs:
+      platforms:
+        description: "Which platform(s) to build and deploy."
+        required: false
+        type: choice
+        default: "All"
+        options:
+          - "All"
+          - "Windows"
+          - "macOS"
+          - "WebGL"
       release_tag:
         description: "Optional release tag, e.g. v1.0.0. Leave empty for normal build."
         required: false
@@ -28,7 +38,6 @@ env:
   GAME_DISPLAY_NAME: ${{ vars.GAME_DISPLAY_NAME || vars.ITCH_GAME }}
 
   ITCH_CHANNEL_WINDOWS: ${{ vars.ITCH_CHANNEL_WINDOWS || 'windows' }}
-  ITCH_CHANNEL_LINUX: ${{ vars.ITCH_CHANNEL_LINUX || 'linux' }}
   ITCH_CHANNEL_MAC: ${{ vars.ITCH_CHANNEL_MAC || 'mac' }}
   ITCH_CHANNEL_WEBGL: ${{ vars.ITCH_CHANNEL_WEBGL || 'html5' }}
 
@@ -44,59 +53,76 @@ env:
 jobs:
 
   # ============================================================
+  # PREPARE BUILD MATRIX
+  # ============================================================
+  #
+  # Turns the `platforms` workflow_dispatch input into the actual
+  # matrix used by the build job below, so you can trigger a build
+  # for just one platform instead of always building all of them.
+  #
+  # ============================================================
+
+  prepare:
+    name: Prepare build matrix
+
+    runs-on: ubuntu-latest
+
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+    steps:
+
+      - name: Determine build matrix
+        id: set-matrix
+        shell: bash
+        run: |
+          set -e
+
+          PLATFORM="${{ inputs.platforms }}"
+
+          WINDOWS_ENTRY='{"name":"Windows","os":"windows-latest","target":"StandaloneWindows64","artifact":"Build-Windows","output":"build/StandaloneWindows64"}'
+          MACOS_ENTRY='{"name":"macOS","os":"macos-latest","target":"StandaloneOSX","artifact":"Build-macOS","output":"build/StandaloneOSX"}'
+          WEBGL_ENTRY='{"name":"WebGL","os":"macos-latest","target":"WebGL","artifact":"Build-WebGL","output":"build/WebGL"}'
+
+          case "$PLATFORM" in
+            Windows)
+              MATRIX="{\"include\":[${WINDOWS_ENTRY}]}"
+              ;;
+            macOS)
+              MATRIX="{\"include\":[${MACOS_ENTRY}]}"
+              ;;
+            WebGL)
+              MATRIX="{\"include\":[${WEBGL_ENTRY}]}"
+              ;;
+            *)
+              MATRIX="{\"include\":[${WINDOWS_ENTRY},${MACOS_ENTRY},${WEBGL_ENTRY}]}"
+              ;;
+          esac
+
+          echo "matrix=${MATRIX}" >> "$GITHUB_OUTPUT"
+
+          echo "========================================"
+          echo "SELECTED PLATFORM(S): ${PLATFORM:-All}"
+          echo "========================================"
+          echo "$MATRIX"
+
+
+  # ============================================================
   # BUILD
   # ============================================================
 
   build:
     name: Build ${{ matrix.name }}
 
+    needs:
+      - prepare
+
     runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
 
-      matrix:
-        include:
-
-          # ------------------------------------------------------
-          # WINDOWS (built on a Windows host)
-          # ------------------------------------------------------
-
-          - name: Windows
-            os: windows-latest
-            target: StandaloneWindows64
-            artifact: Build-Windows
-            output: build/StandaloneWindows64
-
-          # ------------------------------------------------------
-          # LINUX (built on a Linux host)
-          # ------------------------------------------------------
-
-          - name: Linux
-            os: ubuntu-22.04
-            target: StandaloneLinux64
-            artifact: Build-Linux
-            output: build/StandaloneLinux64
-
-          # ------------------------------------------------------
-          # MACOS
-          # ------------------------------------------------------
-
-          - name: macOS
-            os: macos-latest
-            target: StandaloneOSX
-            artifact: Build-macOS
-            output: build/StandaloneOSX
-
-          # ------------------------------------------------------
-          # WEBGL
-          # ------------------------------------------------------
-
-          - name: WebGL
-            os: macos-latest
-            target: WebGL
-            artifact: Build-WebGL
-            output: build/WebGL
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
 
 
     steps:
@@ -384,6 +410,7 @@ jobs:
       # ========================================================
 
       - name: Download Windows build
+        if: inputs.platforms == 'All' || inputs.platforms == 'Windows' || inputs.platforms == ''
         uses: actions/download-artifact@v4
         with:
           name: Build-Windows
@@ -391,21 +418,11 @@ jobs:
 
 
       # ========================================================
-      # DOWNLOAD LINUX
-      # ========================================================
-
-      - name: Download Linux build
-        uses: actions/download-artifact@v4
-        with:
-          name: Build-Linux
-          path: builds/linux
-
-
-      # ========================================================
       # DOWNLOAD MACOS
       # ========================================================
 
       - name: Download macOS build
+        if: inputs.platforms == 'All' || inputs.platforms == 'macOS' || inputs.platforms == ''
         uses: actions/download-artifact@v4
         with:
           name: Build-macOS
@@ -417,6 +434,7 @@ jobs:
       # ========================================================
 
       - name: Download WebGL build
+        if: inputs.platforms == 'All' || inputs.platforms == 'WebGL' || inputs.platforms == ''
         uses: actions/download-artifact@v4
         with:
           name: Build-WebGL
@@ -433,25 +451,19 @@ jobs:
           echo "========================================"
           echo "WINDOWS"
           echo "========================================"
-          find builds/windows -maxdepth 6 -print
-
-          echo ""
-          echo "========================================"
-          echo "LINUX"
-          echo "========================================"
-          find builds/linux -maxdepth 6 -print
+          find builds/windows -maxdepth 6 -print 2>/dev/null || echo "(not built this run)"
 
           echo ""
           echo "========================================"
           echo "MACOS"
           echo "========================================"
-          find builds/macos -maxdepth 6 -print
+          find builds/macos -maxdepth 6 -print 2>/dev/null || echo "(not built this run)"
 
           echo ""
           echo "========================================"
           echo "WEBGL"
           echo "========================================"
-          find builds/webgl -maxdepth 6 -print
+          find builds/webgl -maxdepth 6 -print 2>/dev/null || echo "(not built this run)"
 
 
       # ========================================================
@@ -489,6 +501,7 @@ jobs:
       # ========================================================
 
       - name: Push Windows to itch.io
+        if: inputs.platforms == 'All' || inputs.platforms == 'Windows' || inputs.platforms == ''
         env:
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
         shell: bash
@@ -502,27 +515,11 @@ jobs:
 
 
       # ========================================================
-      # PUSH LINUX
-      # ========================================================
-
-      - name: Push Linux to itch.io
-        env:
-          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
-        shell: bash
-        run: |
-          set -e
-
-          butler push \
-            builds/linux \
-            "${ITCH_USER}/${ITCH_GAME}:${ITCH_CHANNEL_LINUX}" \
-            --userversion "${{ steps.version.outputs.value }}"
-
-
-      # ========================================================
       # PUSH MACOS
       # ========================================================
 
       - name: Push macOS to itch.io
+        if: inputs.platforms == 'All' || inputs.platforms == 'macOS' || inputs.platforms == ''
         env:
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
         shell: bash
@@ -540,6 +537,7 @@ jobs:
       # ========================================================
 
       - name: Push WebGL to itch.io
+        if: inputs.platforms == 'All' || inputs.platforms == 'WebGL' || inputs.platforms == ''
         env:
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
         shell: bash
@@ -575,6 +573,7 @@ jobs:
       # ========================================================
 
       - name: Download Windows build
+        if: inputs.platforms == 'All' || inputs.platforms == 'Windows' || inputs.platforms == ''
         uses: actions/download-artifact@v4
         with:
           name: Build-Windows
@@ -582,21 +581,11 @@ jobs:
 
 
       # ========================================================
-      # DOWNLOAD LINUX
-      # ========================================================
-
-      - name: Download Linux build
-        uses: actions/download-artifact@v4
-        with:
-          name: Build-Linux
-          path: builds/Linux
-
-
-      # ========================================================
       # DOWNLOAD MACOS
       # ========================================================
 
       - name: Download macOS build
+        if: inputs.platforms == 'All' || inputs.platforms == 'macOS' || inputs.platforms == ''
         uses: actions/download-artifact@v4
         with:
           name: Build-macOS
@@ -608,6 +597,7 @@ jobs:
       # ========================================================
 
       - name: Download WebGL build
+        if: inputs.platforms == 'All' || inputs.platforms == 'WebGL' || inputs.platforms == ''
         uses: actions/download-artifact@v4
         with:
           name: Build-WebGL
@@ -625,10 +615,9 @@ jobs:
 
           cd builds
 
-          zip -r "../${{ inputs.release_tag }}-Windows.zip" Windows
-          zip -r "../${{ inputs.release_tag }}-Linux.zip" Linux
-          zip -r "../${{ inputs.release_tag }}-macOS.zip" macOS
-          zip -r "../${{ inputs.release_tag }}-WebGL.zip" WebGL
+          [ -d Windows ] && zip -r "../${{ inputs.release_tag }}-Windows.zip" Windows
+          [ -d macOS ] && zip -r "../${{ inputs.release_tag }}-macOS.zip" macOS
+          [ -d WebGL ] && zip -r "../${{ inputs.release_tag }}-WebGL.zip" WebGL
 
 
       # ========================================================
@@ -674,11 +663,18 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           VERSION: ${{ needs.deploy.outputs.version }}
+          PLATFORMS_INPUT: ${{ inputs.platforms }}
 
         shell: bash
 
         run: |
           set -e
+
+          if [ -z "${PLATFORMS_INPUT}" ] || [ "${PLATFORMS_INPUT}" = "All" ]; then
+            PLATFORM_LIST="Windows, macOS, and Web"
+          else
+            PLATFORM_LIST="${PLATFORMS_INPUT}"
+          fi
 
           if [ -n "${GEMINI_LANGUAGE}" ]; then
             LANGUAGE_INSTRUCTION="Write the response in ${GEMINI_LANGUAGE}."
@@ -688,7 +684,7 @@ jobs:
 
           PROMPT="${GEMINI_PERSONA}
 
-          Write ONE short paragraph (maximum 3 sentences, no markdown formatting, no surrounding quotation marks) announcing that a new build of the game \"${GAME_DISPLAY_NAME}\" version ${VERSION} has successfully been deployed to Windows, Linux, macOS, and Web on itch.io.
+          Write ONE short paragraph (maximum 3 sentences, no markdown formatting, no surrounding quotation marks) announcing that a new build of the game \"${GAME_DISPLAY_NAME}\" version ${VERSION} has successfully been deployed to ${PLATFORM_LIST} on itch.io.
 
           Match the tone and style of the persona above.
           ${LANGUAGE_INSTRUCTION}"
@@ -741,6 +737,7 @@ jobs:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           VERSION: ${{ needs.deploy.outputs.version }}
           FLAVOR_TEXT: ${{ steps.flavor.outputs.text }}
+          PLATFORMS_INPUT: ${{ inputs.platforms }}
 
         shell: bash
 
@@ -749,10 +746,26 @@ jobs:
 
           ITCH_URL="https://${ITCH_USER}.itch.io/${ITCH_GAME}"
 
+          if [ -z "${PLATFORMS_INPUT}" ] || [ "${PLATFORMS_INPUT}" = "All" ]; then
+            WIN_STATUS="✅"
+            MAC_STATUS="✅"
+            WEB_STATUS="✅"
+          else
+            WIN_STATUS="⏭️"
+            MAC_STATUS="⏭️"
+            WEB_STATUS="⏭️"
+            [ "${PLATFORMS_INPUT}" = "Windows" ] && WIN_STATUS="✅"
+            [ "${PLATFORMS_INPUT}" = "macOS" ] && MAC_STATUS="✅"
+            [ "${PLATFORMS_INPUT}" = "WebGL" ] && WEB_STATUS="✅"
+          fi
+
           PAYLOAD=$(jq -n \
             --arg content "$FLAVOR_TEXT" \
             --arg title "${GAME_DISPLAY_NAME} — Build ${VERSION} deployed" \
             --arg url "$ITCH_URL" \
+            --arg win "$WIN_STATUS" \
+            --arg mac "$MAC_STATUS" \
+            --arg web "$WEB_STATUS" \
             '{
               embeds: [
                 {
@@ -763,22 +776,17 @@ jobs:
                   fields: [
                     {
                       name: "Windows",
-                      value: "✅",
-                      inline: true
-                    },
-                    {
-                      name: "Linux",
-                      value: "✅",
+                      value: $win,
                       inline: true
                     },
                     {
                       name: "macOS",
-                      value: "✅",
+                      value: $mac,
                       inline: true
                     },
                     {
                       name: "Web",
-                      value: "✅",
+                      value: $web,
                       inline: true
                     }
                   ]
