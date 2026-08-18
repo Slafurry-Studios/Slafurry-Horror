@@ -50,7 +50,7 @@ jobs:
   build:
     name: Build ${{ matrix.name }}
 
-    runs-on: macos-latest
+    runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
@@ -59,19 +59,21 @@ jobs:
         include:
 
           # ------------------------------------------------------
-          # WINDOWS
+          # WINDOWS (built on a Windows host)
           # ------------------------------------------------------
 
           - name: Windows
+            os: windows-latest
             target: StandaloneWindows64
             artifact: Build-Windows
             output: build/StandaloneWindows64
 
           # ------------------------------------------------------
-          # LINUX
+          # LINUX (built on a Linux host)
           # ------------------------------------------------------
 
           - name: Linux
+            os: ubuntu-latest
             target: StandaloneLinux64
             artifact: Build-Linux
             output: build/StandaloneLinux64
@@ -81,15 +83,17 @@ jobs:
           # ------------------------------------------------------
 
           - name: macOS
+            os: macos-latest
             target: StandaloneOSX
             artifact: Build-macOS
             output: build/StandaloneOSX
 
           # ------------------------------------------------------
-          # WEBGL
+          # WEBGL (no native toolchain needed, Linux host is cheapest)
           # ------------------------------------------------------
 
           - name: WebGL
+            os: ubuntu-latest
             target: WebGL
             artifact: Build-WebGL
             output: build/WebGL
@@ -117,7 +121,7 @@ jobs:
           path: ${{ env.UNITY_PROJECT_PATH }}/Library
 
           key: >-
-            Library-macos-${{ matrix.target }}-
+            Library-${{ matrix.os }}-${{ matrix.target }}-
             ${{ hashFiles(
               format('{0}/Assets/**', env.UNITY_PROJECT_PATH),
               format('{0}/Packages/**', env.UNITY_PROJECT_PATH),
@@ -125,8 +129,8 @@ jobs:
             ) }}
 
           restore-keys: |
-            Library-macos-${{ matrix.target }}-
-            Library-macos-
+            Library-${{ matrix.os }}-${{ matrix.target }}-
+            Library-${{ matrix.os }}-
 
 
       # ========================================================
@@ -140,7 +144,7 @@ jobs:
 
           # IMPORTANT:
           # Ask buildalon to install the module required by
-          # the current matrix target.
+          # the current matrix target, on a matching host OS.
           build-targets: ${{ matrix.target }}
 
 
@@ -174,8 +178,12 @@ jobs:
           echo "${{ matrix.target }}"
 
           echo ""
+          echo "Runner OS:"
+          echo "${{ matrix.os }}"
+
+          echo ""
           echo "Runner:"
-          uname -a
+          uname -a || ver
 
           echo ""
           echo "Project path:"
@@ -244,6 +252,10 @@ jobs:
           echo ""
           echo "Target:"
           echo "${{ matrix.target }}"
+
+          echo ""
+          echo "Runner OS:"
+          echo "${{ matrix.os }}"
 
           echo ""
 
