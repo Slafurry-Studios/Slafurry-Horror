@@ -30,19 +30,16 @@ jobs:
           rm -rf state \
             Assets/_Game/02_Art/Sprite \
             Assets/_Game/03_Audio \
-            Assets/_Game/02_Art/Mesh \
-            Assets/_Game/02_Art/Texture
+            Assets/_Game/02_Art/Mesh 
           mkdir -p \
             state \
             Assets/_Game/02_Art/Sprite \
             Assets/_Game/03_Audio \
-            Assets/_Game/02_Art/Mesh \
-            Assets/_Game/02_Art/Texture
+            Assets/_Game/02_Art/Mesh 
           git archive origin/main -- state 2>/dev/null | tar -x || true
           git archive origin/main -- Assets/_Game/02_Art/Sprite 2>/dev/null | tar -x || true
           git archive origin/main -- Assets/_Game/03_Audio 2>/dev/null | tar -x || true
           git archive origin/main -- Assets/_Game/02_Art/Mesh 2>/dev/null | tar -x || true
-          git archive origin/main -- Assets/_Game/02_Art/Texture 2>/dev/null | tar -x || true
 
       - name: Retrieve new sprite files
         env:
@@ -86,20 +83,6 @@ jobs:
             --project-name "${{ github.repository }} (mesh)" \
             --discord-webhook "${{ secrets.DISCORD_WEBHOOK_URL }}"
 
-      - name: Retrieve new texture files
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
-          GEMINI_PERSONA: ${{ secrets.GEMINI_PERSONA }}
-        run: |
-          python retrieve.py \
-            --drive-folder-id "${{ secrets.DRIVE_TEXTURE_FOLDER_ID }}" \
-            --service-account-b64 "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON_B64 }}" \
-            --state-file "state/texture_manifest.json" \
-            --download-dir "Assets/_Game/02_Art/Texture" \
-            --project-name "${{ github.repository }} (texture)" \
-            --discord-webhook "${{ secrets.DISCORD_WEBHOOK_URL }}"
-
       - name: Commit retrieved files to chore/asset
         id: commit
         env:
@@ -124,8 +107,7 @@ jobs:
             "$WORKTREE/state" \
             "$WORKTREE/Assets/_Game/02_Art/Sprite" \
             "$WORKTREE/Assets/_Game/03_Audio" \
-            "$WORKTREE/Assets/_Game/02_Art/Mesh" \
-            "$WORKTREE/Assets/_Game/02_Art/Texture"
+            "$WORKTREE/Assets/_Game/02_Art/Mesh" 
 
           cp -f state/*.json \
             "$WORKTREE/state/" 2>/dev/null || true
@@ -139,17 +121,13 @@ jobs:
           cp -rf Assets/_Game/02_Art/Mesh/. \
             "$WORKTREE/Assets/_Game/02_Art/Mesh/" 2>/dev/null || true
 
-          cp -rf Assets/_Game/02_Art/Texture/. \
-            "$WORKTREE/Assets/_Game/02_Art/Texture/" 2>/dev/null || true
-
           cd "$WORKTREE"
 
           git add \
             state/ \
             Assets/_Game/02_Art/Sprite \
             Assets/_Game/03_Audio \
-            Assets/_Game/02_Art/Mesh \
-            Assets/_Game/02_Art/Texture
+            Assets/_Game/02_Art/Mesh 
 
           if git diff --cached --quiet; then
             echo "No changes, skipping."
