@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: VolumetricLight 1
+  m_Name: VolumetricLight 2
   m_Shader: {fileID: -6465566751694194690, guid: 4b1de7be0a4f1ff43a68196fa363f86c,
     type: 3}
   m_Parent: {fileID: 0}
@@ -99,7 +99,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - Boolean_52C16ADA: 1
+    - Boolean_52C16ADA: 0
     - Vector1_C436030E: 0.3
     - Vector1_D9BD7578: 0.1
     - _AlphaClip: 0

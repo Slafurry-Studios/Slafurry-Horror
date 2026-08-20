@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Active: 1
   m_Settings:
-    AOMethod: 1
+    AOMethod: 0
     Downsample: 0
     AfterOpaque: 0
     Source: 1
