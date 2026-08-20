@@ -95,7 +95,7 @@ public class DialoguePlayer : MonoBehaviour
             _freezeFunc = () => 0f;
             FirstPersonMovement.instance.speedOverrides.Add(_freezeFunc);
         }
-        if (playerLook != null) playerLook.LockRotasi();
+        if (playerLook != null) playerLook.LockRotation();
     }
 
     private void UnlockPlayer()
@@ -105,6 +105,6 @@ public class DialoguePlayer : MonoBehaviour
             FirstPersonMovement.instance.speedOverrides.Remove(_freezeFunc);
             _freezeFunc = null;
         }
-        if (playerLook != null) playerLook.UnlockRotasi();
+        if (playerLook != null) playerLook.UnlockRotation();
     }
 }
