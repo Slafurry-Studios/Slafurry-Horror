@@ -29,7 +29,7 @@ public class PlayerInteract : MonoBehaviour
 
     public bool InteractionEnabled { get; private set; } = true;
 
-    private InteractableObjectEvent currentInteractable;
+    private IInteractable currentInteractable;
     private Coroutine temporaryMessageRoutine;
 
     private void Awake()
@@ -118,8 +118,8 @@ public class PlayerInteract : MonoBehaviour
             interactRange,
             interactableMask))
         {
-            InteractableObjectEvent interactable =
-                hit.transform.GetComponentInParent<InteractableObjectEvent>();
+            IInteractable interactable =
+                hit.transform.GetComponentInParent<IInteractable>();
 
             if (interactable != null && interactable.CanInteract())
             {

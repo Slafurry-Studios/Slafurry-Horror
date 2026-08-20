@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-public class InteractableObjectEvent : MonoBehaviour
+public class InteractableObject : MonoBehaviour, IInteractable
 {
     [Header("Prompt")]
     [TextArea(1, 2)]

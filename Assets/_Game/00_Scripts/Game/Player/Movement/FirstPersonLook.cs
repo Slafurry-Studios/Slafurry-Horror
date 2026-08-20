@@ -31,8 +31,7 @@ public class FirstPersonLook : MonoBehaviour
         {
             character = FirstPersonMovement.instance.transform;
         }
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        HideCursor();
         SyncVelocityWithCurrentRotation();
     }
 
@@ -57,6 +56,12 @@ public class FirstPersonLook : MonoBehaviour
 
         character.localRotation = Quaternion.AngleAxis(velocity.x, Vector3.up);
         cameraPivot.rotation = character.rotation * Quaternion.AngleAxis(-velocity.y, Vector3.right);
+    }
+
+    public void HideCursor()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     public void LockRotation()

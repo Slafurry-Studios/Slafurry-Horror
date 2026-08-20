@@ -271,6 +271,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8989382602763301714, guid: 485284f279b79f414bb3753b74be9159,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -961,6 +966,12 @@ Mesh:
     offset: 0
     size: 0
     path: 
+--- !u!225 &176185730 stripped
+CanvasGroup:
+  m_CorrespondingSourceObject: {fileID: 3845502506540191465, guid: aae82fec25de6804f92705d4b33afb0d,
+    type: 3}
+  m_PrefabInstance: {fileID: 8206863218611213142}
+  m_PrefabAsset: {fileID: 0}
 --- !u!43 &217766590
 Mesh:
   m_ObjectHideFlags: 0
@@ -3111,7 +3122,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1325005450}
-  m_Father: {fileID: 1646754469}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -3725,12 +3736,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1212627256}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &875425996 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8814749135254859477, guid: aae82fec25de6804f92705d4b33afb0d,
-    type: 3}
-  m_PrefabInstance: {fileID: 8206863218611213142}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &883262665
 GameObject:
   m_ObjectHideFlags: 0
@@ -6039,6 +6044,179 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1212627256}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &1536069329
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3960248854213472089, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5336459674990860010, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: m_Name
+      value: InspectCanvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 6167196478181900709, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -0.000063209685
+      objectReference: {fileID: 0}
+    - target: {fileID: 6210295056909342405, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: m_Value
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6414459072855688227, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6414459072855688227, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6414459072855688227, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6877436575909782264, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: examinePoint
+      value: 
+      objectReference: {fileID: 1670392486}
+    - target: {fileID: 7953186917888036069, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: m_Pivot.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7953186917888036069, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: m_Pivot.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7953186917888036069, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7953186917888036069, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7953186917888036069, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7953186917888036069, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7953186917888036069, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7953186917888036069, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7953186917888036069, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7953186917888036069, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7953186917888036069, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7953186917888036069, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7953186917888036069, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7953186917888036069, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7953186917888036069, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7953186917888036069, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7953186917888036069, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7953186917888036069, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7953186917888036069, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7953186917888036069, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8533580439839516064, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: canvasGroups.Array.data[1]
+      value: 
+      objectReference: {fileID: 176185730}
+    - target: {fileID: 8551359946532795708, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8551359946532795708, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8551359946532795708, guid: d8ead2163ffde439ebf77702f616caed,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: d8ead2163ffde439ebf77702f616caed, type: 3}
 --- !u!1 &1620779654
 GameObject:
   m_ObjectHideFlags: 0
@@ -6585,9 +6763,7 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1901616039}
-  - {fileID: 584440962}
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!43 &1667286097
@@ -6755,6 +6931,12 @@ Mesh:
     offset: 0
     size: 0
     path: 
+--- !u!4 &1670392486 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8873821918086694919, guid: aae82fec25de6804f92705d4b33afb0d,
+    type: 3}
+  m_PrefabInstance: {fileID: 8206863218611213142}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1678309719
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7809,7 +7991,7 @@ Transform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1646754469}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1902323211
 GameObject:
@@ -7926,77 +8108,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 1902323211}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d5a76220f811f0468de928e02670e65, type: 3}
+  m_Script: {fileID: 11500000, guid: 5fe428616d774062cb4e6ece7a0f237f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  title: PlayerMove.cs
-  description: "using System.Collections.Generic;\nusing UnityEngine;\nusing Cinemachine;\n\n[RequireComponent(typeof(CharacterController))]\npublic
-    class FirstPersonMovement : MonoBehaviour\n{\n    public static FirstPersonMovement
-    instance;\n\n    [Header(\"Movement\")]\n    public float speed = 5;\n\n    [Header(\"Running\")]\n   
-    public bool canRun = true;\n    public float runSpeed = 9;\n    public KeyCode
-    runningKey = KeyCode.LeftShift;\n\n    [Header(\"Jump\")]\n    public bool canJump
-    = true;\n    public float jumpForce = 6f;\n    public KeyCode jumpKey = KeyCode.Space;\n\n   
-    [Header(\"Gravity\")]\n    public float gravity = -20f;\n    public float groundedStickForce
-    = -2f;\n\n    [Header(\"Crouch\")]\n    public bool canCrouch = true;\n    public
-    KeyCode crouchKey = KeyCode.LeftControl;\n    public float crouchSpeed = 2.5f;\n   
-    public float crouchHeight = 1f;\n    [Range(0f, 1.5f)]\n    public float crouchCameraDrop
-    = 0.5f;\n    public LayerMask obstacleMask;\n\n    [Header(\"Cinemachine\")]\n   
-    public CinemachineVirtualCamera virtualCamera;\n    public Transform cameraHolder;\n\n   
-    public bool IsRunning { get; private set; }\n    public bool IsCrouching { get;
-    private set; }\n    public Vector3 HorizontalVelocity => lastHorizontalVelocity;\n   
-    public bool IsGrounded => controller.isGrounded;\n\n    [HideInInspector] public
-    CharacterController controller;\n    public List<System.Func<float>> speedOverrides
-    = new List<System.Func<float>>();\n\n    private CinemachineTransposer transposer;\n   
-    private float standOffsetY;\n    private float standLocalY;\n\n    private float
-    standHeight;\n    private Vector3 standCenter;\n\n    private Vector3 verticalVelocity;\n   
-    private Vector3 lastHorizontalVelocity;\n\n    void Awake()\n    {\n        instance
-    = this;\n        controller = GetComponent<CharacterController>();\n\n       
-    standHeight = controller.height;\n        standCenter = controller.center;\n\n       
-    if (virtualCamera != null)\n        {\n            transposer = virtualCamera.GetCinemachineComponent<CinemachineTransposer>();\n           
-    if (transposer != null) standOffsetY = transposer.m_FollowOffset.y;\n       
-    }\n        if (cameraHolder != null) standLocalY = cameraHolder.localPosition.y;\n   
-    }\n\n    void Update()\n    {\n        if (canJump && Input.GetKeyDown(jumpKey))
-    Jump();\n        if (canCrouch && Input.GetKeyDown(crouchKey)) ToggleCrouch();\n       
-    HandleMovement();\n    }\n\n    private void HandleMovement()\n    {\n       
-    bool grounded = controller.isGrounded;\n\n        float targetSpeed = IsRunning
-    ? runSpeed : speed;\n        if (IsCrouching) targetSpeed = crouchSpeed;\n       
-    if (speedOverrides.Count > 0) targetSpeed = speedOverrides[speedOverrides.Count
-    - 1]();\n\n        IsRunning = canRun && !IsCrouching && Input.GetKey(runningKey);\n\n       
-    Vector2 input = new Vector2(Input.GetAxis(\"Horizontal\"), Input.GetAxis(\"Vertical\"));\n       
-    Vector3 horizontalMove = transform.rotation * new Vector3(input.x, 0f, input.y)
-    * targetSpeed;\n\n        if (grounded && verticalVelocity.y < 0f) verticalVelocity.y
-    = groundedStickForce;\n        verticalVelocity.y += gravity * Time.deltaTime;\n\n       
-    controller.Move((horizontalMove + verticalVelocity) * Time.deltaTime);\n       
-    lastHorizontalVelocity = horizontalMove;\n    }\n\n    public void Jump()\n   
-    {\n        if (!canJump || !controller.isGrounded || IsCrouching) return;\n       
-    verticalVelocity.y = jumpForce;\n    }\n\n    public void ToggleCrouch()\n   
-    {\n        if (!canCrouch) return;\n\n        if (IsCrouching)\n        {\n           
-    if (!CanStandUp()) return;\n            IsCrouching = false;\n        }\n       
-    else\n        {\n            IsCrouching = true;\n        }\n\n        ApplyCrouchVisuals();\n   
-    }\n\n    private bool CanStandUp()\n    {\n        float currentTop = controller.center.y
-    + controller.height / 2f;\n        float standTop = standCenter.y + standHeight
-    / 2f;\n        float extraHeightNeeded = standTop - currentTop;\n\n        float
-    skin = 0.05f;\n        Vector3 rayOrigin = transform.position + Vector3.up *
-    (currentTop - skin);\n\n        bool blocked = Physics.Raycast(rayOrigin, Vector3.up,
-    extraHeightNeeded + skin, obstacleMask, QueryTriggerInteraction.Ignore);\n       
-    return !blocked;\n    }\n\n    private void ApplyCrouchVisuals()\n    {\n       
-    controller.height = IsCrouching ? crouchHeight : standHeight;\n\n        float
-    centerY = IsCrouching\n            ? standCenter.y - (standHeight - crouchHeight)
-    / 2f\n            : standCenter.y;\n        controller.center = new Vector3(standCenter.x,
-    centerY, standCenter.z);\n\n        if (transposer != null)\n        {\n           
-    Vector3 offset = transposer.m_FollowOffset;\n            offset.y = IsCrouching
-    ? standOffsetY - crouchCameraDrop : standOffsetY;\n            transposer.m_FollowOffset
-    = offset;\n        }\n        else if (cameraHolder != null)\n        {\n           
-    Vector3 pos = cameraHolder.localPosition;\n            pos.y = IsCrouching ?
-    standLocalY - crouchCameraDrop : standLocalY;\n            cameraHolder.localPosition
-    = pos;\n        }\n    }\n\n    void OnDrawGizmosSelected()\n    {\n        if
-    (controller == null) return;\n\n        float currentTop = controller.center.y
-    + controller.height / 2f;\n        float standTop = Application.isPlaying\n           
-    ? standCenter.y + standHeight / 2f\n            : controller.center.y + controller.height
-    / 2f; \n\n        Gizmos.color = IsCrouching ? Color.red : Color.cyan;\n       
-    Gizmos.DrawWireSphere(transform.position + Vector3.up * currentTop, controller.radius
-    * 0.9f);\n\n        Gizmos.color = Color.magenta;\n        Gizmos.DrawWireSphere(transform.position
-    + Vector3.up * standTop, controller.radius * 0.9f);\n    }\n}"
+  promptText: Press E to Inspect
+  title: dggdw
+  description: dvesw
+  OnInspect:
+    m_PersistentCalls:
+      m_Calls: []
+  inspectHUD: {fileID: 0}
 --- !u!43 &1993439229
 Mesh:
   m_ObjectHideFlags: 0
@@ -9493,41 +9614,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1212627256}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!4 &2112028915 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 1992998842693020963, guid: aae82fec25de6804f92705d4b33afb0d,
-    type: 3}
-  m_PrefabInstance: {fileID: 8206863218611213142}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &2112028925
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 875425996}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8e1264890e2c46a559b742666e77e011, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  viewTransform: {fileID: 2112028915}
-  viewCamera: {fileID: 56237777308643585}
-  interactRange: 3
-  interactableMask:
-    serializedVersion: 2
-    m_Bits: 64
-  interactKey: 101
-  promptText: {fileID: 55493304}
-  OnPromptShown:
-    m_PersistentCalls:
-      m_Calls: []
-  OnPromptHidden:
-    m_PersistentCalls:
-      m_Calls: []
-  OnInteracted:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &2140426998
 GameObject:
   m_ObjectHideFlags: 0
@@ -10093,7 +10179,7 @@ Transform:
   m_GameObject: {fileID: 5164133535515878885}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2.6, z: 0}
+  m_LocalPosition: {x: 0, y: 3.01, z: -11.07}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -10238,12 +10324,12 @@ PrefabInstance:
     - target: {fileID: 1992998842693020963, guid: aae82fec25de6804f92705d4b33afb0d,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1
+      value: 1.41
       objectReference: {fileID: 0}
     - target: {fileID: 1992998842693020963, guid: aae82fec25de6804f92705d4b33afb0d,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -11.07
       objectReference: {fileID: 0}
     - target: {fileID: 1992998842693020963, guid: aae82fec25de6804f92705d4b33afb0d,
         type: 3}
@@ -10280,20 +10366,35 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3141193548182543316, guid: aae82fec25de6804f92705d4b33afb0d,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 102
+      objectReference: {fileID: 0}
+    - target: {fileID: 5002093872486854911, guid: aae82fec25de6804f92705d4b33afb0d,
+        type: 3}
+      propertyPath: m_Camera
+      value: 
+      objectReference: {fileID: 56237777308643585}
+    - target: {fileID: 7226673253873591198, guid: aae82fec25de6804f92705d4b33afb0d,
+        type: 3}
+      propertyPath: promptText
+      value: 
+      objectReference: {fileID: 55493304}
+    - target: {fileID: 7226673253873591198, guid: aae82fec25de6804f92705d4b33afb0d,
+        type: 3}
+      propertyPath: viewCamera
+      value: 
+      objectReference: {fileID: 56237777308643585}
     - target: {fileID: 8814749135254859477, guid: aae82fec25de6804f92705d4b33afb0d,
         type: 3}
       propertyPath: m_Name
       value: ====== PLAYER ======
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects:
-    - {fileID: 4308424187760980330, guid: aae82fec25de6804f92705d4b33afb0d, type: 3}
+    m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 8814749135254859477, guid: aae82fec25de6804f92705d4b33afb0d,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2112028925}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: aae82fec25de6804f92705d4b33afb0d, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
@@ -10305,4 +10406,7 @@ SceneRoots:
   - {fileID: 1132222297}
   - {fileID: 6856211347150644660}
   - {fileID: 76498144208321340}
+  - {fileID: 1536069329}
   - {fileID: 55493303}
+  - {fileID: 584440962}
+  - {fileID: 1901616039}
