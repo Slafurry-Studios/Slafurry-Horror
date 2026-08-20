@@ -1,0 +1,102 @@
+name: Track Drive Changes
+
+on:
+  schedule:
+    - cron: '0 23 * * *'  # 07:00 WITA (UTC+8) daily
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  track:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - run: pip install -r requirements.txt
+
+      - name: Check sprite folder for changes
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+          GEMINI_PERSONA: ${{ secrets.GEMINI_PERSONA }}
+        run: |
+          python track.py \
+            --drive-folder-id "${{ secrets.DRIVE_SPRITE_FOLDER_ID }}" \
+            --service-account-b64 "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON_B64 }}" \
+            --discord-webhook "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+            --state-file "state/sprite_manifest.json" \
+            --project-name "${{ github.repository }} (sprite)"
+
+      - name: Check audio folder for changes
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+          GEMINI_PERSONA: ${{ secrets.GEMINI_PERSONA }}
+        run: |
+          python track.py \
+            --drive-folder-id "${{ secrets.DRIVE_AUDIO_FOLDER_ID }}" \
+            --service-account-b64 "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON_B64 }}" \
+            --discord-webhook "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+            --state-file "state/audio_manifest.json" \
+            --project-name "${{ github.repository }} (audio)"
+
+      - name: Check mesh folder for changes
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+          GEMINI_PERSONA: ${{ secrets.GEMINI_PERSONA }}
+        run: |
+          python track.py \
+            --drive-folder-id "${{ secrets.DRIVE_MESH_FOLDER_ID }}" \
+            --service-account-b64 "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON_B64 }}" \
+            --discord-webhook "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+            --state-file "state/mesh_manifest.json" \
+            --project-name "${{ github.repository }} (mesh)"
+
+      - name: Check texture folder for changes
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+          GEMINI_PERSONA: ${{ secrets.GEMINI_PERSONA }}
+        run: |
+          python track.py \
+            --drive-folder-id "${{ secrets.DRIVE_TEXTURE_FOLDER_ID }}" \
+            --service-account-b64 "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON_B64 }}" \
+            --discord-webhook "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+            --state-file "state/texture_manifest.json" \
+            --project-name "${{ github.repository }} (texture)"
+
+      - name: Commit updated state directly to main
+        env:
+          BOT_GIT_USERNAME: ${{ vars.BOT_GIT_USERNAME || 'Kei Tendou' }}
+          BOT_GIT_EMAIL: ${{ vars.BOT_GIT_EMAIL || 'Slafurry[bot]@users.noreply.github.com' }}
+          BOT_PAT: ${{ secrets.BOT_PAT }}
+        run: |
+          git config user.name "$BOT_GIT_USERNAME"
+          git config user.email "$BOT_GIT_EMAIL"
+
+          git add state/
+
+          if git diff --cached --quiet; then
+            echo "No state changes, skipping."
+            exit 0
+          fi
+
+          git commit -m "chore(assets): update drive state [skip ci]"
+
+          # Rebase on top of latest main in case something landed
+          # while this job was running, then push directly using
+          # the dedicated bot account's PAT so it clears the
+          # branch protection bypass list.
+          git pull --rebase origin main
+          git push "https://x-access-token:${BOT_PAT}@github.com/${{ github.repository }}.git" HEAD:main

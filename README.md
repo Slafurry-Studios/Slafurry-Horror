@@ -2,7 +2,7 @@
 Game psychological horror survival-mystery first-person berlatar tahun 1987 di sebuah daerah terisolasi.
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/9dee6058-b82a-43b4-ae26-eab6ffe699da" width="100%" alt="One Sacrifice One Truth banner" />
+  <img src="https://github.com/user-attachments/assets/5dbea424-6591-453e-bd0e-6cf64e3ddd9c" width="100%" alt="One Sacrifice One Truth banner" />
 </p>
 <br>
 <p align="left">
@@ -28,15 +28,14 @@ Game psychological horror survival-mystery first-person berlatar tahun 1987 di s
 
 ## GETTING STARTED
 ### Prerequisites
-- Unity `[version]`
+- Unity `2022.3.62f3`
 - Git LFS ([installation guide](https://git-lfs.github.com))
 
 ### Setup
 ```bash
 git lfs install
-git clone [repo-url]
+git clone https://github.com/Slafurry-Studios/Slafurry-Horror.git
 ```
-Open the project in Unity Hub, let it import, then open the `Boot` scene to start.
 
 ### Documentation
 - Shared runtime systems: [Assets/_Game/00_Scripts/System/README.md](Assets/_Game/00_Scripts/System/README.md)
@@ -55,8 +54,11 @@ Open the project in Unity Hub, let it import, then open the `Boot` scene to star
 ## TEAM
 | Role | Name |
 |---|---|
-| [Role] | [Name] |
-| [Role] | [Name] |
+| Project Lead/Game Designer | Chim-dev |
+| Project Manager/3D Artist | Noufall90 |
+| Programmer | junN0ir |
+| Programmer | muhammadzaini213 |
+| 2D Artist/QA | ModDiv |
 
 ---
 

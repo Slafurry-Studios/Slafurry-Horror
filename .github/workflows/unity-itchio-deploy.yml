@@ -1,0 +1,800 @@
+name: Build and Deploy to itch.io
+
+on:
+  workflow_dispatch:
+    inputs:
+      platforms:
+        description: "Which platform(s) to build and deploy."
+        required: false
+        type: choice
+        default: "All"
+        options:
+          - "All"
+          - "Windows"
+          - "macOS"
+          - "WebGL"
+      release_tag:
+        description: "Optional release tag, e.g. v1.0.0. Leave empty for normal build."
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: write
+
+env:
+  # ============================================================
+  # GENERAL
+  # ============================================================
+
+  UNITY_PROJECT_PATH: ${{ vars.UNITY_PROJECT_PATH || '.' }}
+
+  # ============================================================
+  # ITCH.IO
+  # ============================================================
+
+  ITCH_USER: ${{ vars.ITCH_USER }}
+  ITCH_GAME: ${{ vars.ITCH_GAME }}
+  GAME_DISPLAY_NAME: ${{ vars.GAME_DISPLAY_NAME || vars.ITCH_GAME }}
+
+  ITCH_CHANNEL_WINDOWS: ${{ vars.ITCH_CHANNEL_WINDOWS || 'windows' }}
+  ITCH_CHANNEL_MAC: ${{ vars.ITCH_CHANNEL_MAC || 'mac' }}
+  ITCH_CHANNEL_WEBGL: ${{ vars.ITCH_CHANNEL_WEBGL || 'html5' }}
+
+  # ============================================================
+  # GEMINI
+  # ============================================================
+
+  GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-2.5-flash' }}
+  GEMINI_PERSONA: ${{ vars.GEMINI_PERSONA || 'You are a laid-back, enthusiastic game release announcer with a light sense of humor.' }}
+  GEMINI_LANGUAGE: ${{ vars.GEMINI_LANGUAGE || '' }}
+
+
+jobs:
+
+  # ============================================================
+  # PREPARE BUILD MATRIX
+  # ============================================================
+  #
+  # Turns the `platforms` workflow_dispatch input into the actual
+  # matrix used by the build job below, so you can trigger a build
+  # for just one platform instead of always building all of them.
+  #
+  # ============================================================
+
+  prepare:
+    name: Prepare build matrix
+
+    runs-on: ubuntu-latest
+
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+    steps:
+
+      - name: Determine build matrix
+        id: set-matrix
+        shell: bash
+        run: |
+          set -e
+
+          PLATFORM="${{ inputs.platforms }}"
+
+          WINDOWS_ENTRY='{"name":"Windows","os":"windows-latest","target":"StandaloneWindows64","artifact":"Build-Windows","output":"build/StandaloneWindows64"}'
+          MACOS_ENTRY='{"name":"macOS","os":"macos-latest","target":"StandaloneOSX","artifact":"Build-macOS","output":"build/StandaloneOSX"}'
+          WEBGL_ENTRY='{"name":"WebGL","os":"macos-latest","target":"WebGL","artifact":"Build-WebGL","output":"build/WebGL"}'
+
+          case "$PLATFORM" in
+            Windows)
+              MATRIX="{\"include\":[${WINDOWS_ENTRY}]}"
+              ;;
+            macOS)
+              MATRIX="{\"include\":[${MACOS_ENTRY}]}"
+              ;;
+            WebGL)
+              MATRIX="{\"include\":[${WEBGL_ENTRY}]}"
+              ;;
+            *)
+              MATRIX="{\"include\":[${WINDOWS_ENTRY},${MACOS_ENTRY},${WEBGL_ENTRY}]}"
+              ;;
+          esac
+
+          echo "matrix=${MATRIX}" >> "$GITHUB_OUTPUT"
+
+          echo "========================================"
+          echo "SELECTED PLATFORM(S): ${PLATFORM:-All}"
+          echo "========================================"
+          echo "$MATRIX"
+
+
+  # ============================================================
+  # BUILD
+  # ============================================================
+
+  build:
+    name: Build ${{ matrix.name }}
+
+    needs:
+      - prepare
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
+
+
+    steps:
+
+      # ========================================================
+      # CHECKOUT
+      # ========================================================
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+
+      # ========================================================
+      # CACHE UNITY LIBRARY
+      # ========================================================
+
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.UNITY_PROJECT_PATH }}/Library
+
+          key: >-
+            Library-${{ matrix.os }}-${{ matrix.target }}-
+            ${{ hashFiles(
+              format('{0}/Assets/**', env.UNITY_PROJECT_PATH),
+              format('{0}/Packages/**', env.UNITY_PROJECT_PATH),
+              format('{0}/ProjectSettings/**', env.UNITY_PROJECT_PATH)
+            ) }}
+
+          restore-keys: |
+            Library-${{ matrix.os }}-${{ matrix.target }}-
+            Library-${{ matrix.os }}-
+
+
+      # ========================================================
+      # SETUP UNITY + REQUIRED BUILD MODULE
+      # ========================================================
+
+      - name: Setup Unity
+        uses: buildalon/unity-setup@v2
+        with:
+          version-file: ${{ env.UNITY_PROJECT_PATH }}/ProjectSettings/ProjectVersion.txt
+
+          # IMPORTANT:
+          # Ask buildalon to install the module required by
+          # the current matrix target, on a matching host OS.
+          build-targets: ${{ matrix.target }}
+
+
+      # ========================================================
+      # ACTIVATE UNITY LICENSE
+      # ========================================================
+
+      - name: Activate Unity license
+        uses: buildalon/activate-unity-license@v2
+        with:
+          license: Personal
+          username: ${{ secrets.UNITY_EMAIL }}
+          password: ${{ secrets.UNITY_PASSWORD }}
+
+
+      # ========================================================
+      # SHOW UNITY ENVIRONMENT
+      # ========================================================
+
+      - name: Show Unity environment
+        shell: bash
+        run: |
+          set -e
+
+          echo "========================================"
+          echo "UNITY BUILD ENVIRONMENT"
+          echo "========================================"
+
+          echo ""
+          echo "Target:"
+          echo "${{ matrix.target }}"
+
+          echo ""
+          echo "Runner OS:"
+          echo "${{ matrix.os }}"
+
+          echo ""
+          echo "Runner:"
+          uname -a || ver
+
+          echo ""
+          echo "Project path:"
+          echo "${UNITY_PROJECT_PATH}"
+
+          echo ""
+          echo "Unity project version:"
+          cat "${UNITY_PROJECT_PATH}/ProjectSettings/ProjectVersion.txt"
+
+          echo ""
+          echo "Unity editor:"
+          echo "${UNITY_EDITOR_PATH:-unknown}"
+
+          echo ""
+          echo "========================================"
+          echo "UNITY INSTALLATION"
+          echo "========================================"
+
+          if [ -n "${UNITY_EDITOR_PATH:-}" ] && [ -x "${UNITY_EDITOR_PATH}" ]; then
+            "${UNITY_EDITOR_PATH}" \
+              -batchmode \
+              -quit \
+              -version || true
+          fi
+
+          echo ""
+          echo "========================================"
+          echo "TARGET"
+          echo "========================================"
+
+          echo "${{ matrix.target }}"
+
+          echo ""
+          echo "========================================"
+
+
+      # ========================================================
+      # BUILD UNITY PROJECT
+      # ========================================================
+
+      - name: Build Unity project
+        uses: buildalon/unity-action@v3
+        with:
+          args: >-
+            -quit
+            -batchmode
+            -nographics
+            -projectPath "${{ env.UNITY_PROJECT_PATH }}"
+            -buildTarget ${{ matrix.target }}
+            -executeMethod BuildScript.Build
+            -logFile "${{ github.workspace }}/unity-build.log"
+
+
+      # ========================================================
+      # SHOW UNITY LOG ON FAILURE
+      # ========================================================
+
+      - name: Diagnose Unity failure
+        if: failure()
+        shell: bash
+        run: |
+          echo "========================================"
+          echo "UNITY BUILD FAILED"
+          echo "========================================"
+
+          echo ""
+          echo "Target:"
+          echo "${{ matrix.target }}"
+
+          echo ""
+          echo "Runner OS:"
+          echo "${{ matrix.os }}"
+
+          echo ""
+
+          if [ -f "${GITHUB_WORKSPACE}/unity-build.log" ]; then
+
+            echo "========================================"
+            echo "LIKELY ERRORS"
+            echo "========================================"
+
+            grep -n -E \
+              "error CS|error:|Error|Exception|Build failed|BuildScript|unsupported|not installed|scripting backend" \
+              "${GITHUB_WORKSPACE}/unity-build.log" \
+              | tail -200 || true
+
+            echo ""
+            echo "========================================"
+            echo "LAST 300 LOG LINES"
+            echo "========================================"
+
+            tail -300 "${GITHUB_WORKSPACE}/unity-build.log"
+
+          else
+
+            echo "Unity build log was not generated."
+
+          fi
+
+
+      # ========================================================
+      # VERIFY BUILD
+      # ========================================================
+
+      - name: Verify build output
+        shell: bash
+        run: |
+          echo "========================================"
+          echo "VERIFYING BUILD OUTPUT"
+          echo "========================================"
+
+          if [ ! -d "${{ matrix.output }}" ]; then
+
+            echo "::error::Build output not found:"
+            echo "${{ matrix.output }}"
+
+            echo ""
+            echo "========================================"
+            echo "BUILD DIRECTORY"
+            echo "========================================"
+
+            if [ -d build ]; then
+              find build -maxdepth 6 -print
+            else
+              echo "build directory does not exist."
+            fi
+
+            exit 1
+          fi
+
+          echo "Build output found:"
+          echo ""
+
+          find "${{ matrix.output }}" \
+            -maxdepth 6 \
+            -type f \
+            | head -200
+
+          echo ""
+          echo "Build verification successful."
+
+
+      # ========================================================
+      # UPLOAD ARTIFACT
+      # ========================================================
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.output }}
+          if-no-files-found: error
+          retention-days: 7
+
+
+
+  # ============================================================
+  # DEPLOY TO ITCH.IO
+  # ============================================================
+
+  deploy:
+    name: Deploy to itch.io
+
+    needs:
+      - build
+
+    runs-on: ubuntu-latest
+
+    outputs:
+      version: ${{ steps.version.outputs.value }}
+
+    steps:
+
+      # ========================================================
+      # RESOLVE VERSION
+      # ========================================================
+
+      - name: Resolve version
+        id: version
+        shell: bash
+        run: |
+          if [ -n "${{ inputs.release_tag }}" ]; then
+            VERSION="${{ inputs.release_tag }}"
+          else
+            VERSION="${GITHUB_SHA::7}"
+          fi
+
+          echo "value=${VERSION}" >> "$GITHUB_OUTPUT"
+
+          echo "========================================"
+          echo "DEPLOYMENT VERSION"
+          echo "========================================"
+          echo "${VERSION}"
+
+
+      # ========================================================
+      # DOWNLOAD WINDOWS
+      # ========================================================
+
+      - name: Download Windows build
+        if: inputs.platforms == 'All' || inputs.platforms == 'Windows' || inputs.platforms == ''
+        uses: actions/download-artifact@v4
+        with:
+          name: Build-Windows
+          path: builds/windows
+
+
+      # ========================================================
+      # DOWNLOAD MACOS
+      # ========================================================
+
+      - name: Download macOS build
+        if: inputs.platforms == 'All' || inputs.platforms == 'macOS' || inputs.platforms == ''
+        uses: actions/download-artifact@v4
+        with:
+          name: Build-macOS
+          path: builds/macos
+
+
+      # ========================================================
+      # DOWNLOAD WEBGL
+      # ========================================================
+
+      - name: Download WebGL build
+        if: inputs.platforms == 'All' || inputs.platforms == 'WebGL' || inputs.platforms == ''
+        uses: actions/download-artifact@v4
+        with:
+          name: Build-WebGL
+          path: builds/webgl
+
+
+      # ========================================================
+      # SHOW DOWNLOADED BUILDS
+      # ========================================================
+
+      - name: Show downloaded builds
+        shell: bash
+        run: |
+          echo "========================================"
+          echo "WINDOWS"
+          echo "========================================"
+          find builds/windows -maxdepth 6 -print 2>/dev/null || echo "(not built this run)"
+
+          echo ""
+          echo "========================================"
+          echo "MACOS"
+          echo "========================================"
+          find builds/macos -maxdepth 6 -print 2>/dev/null || echo "(not built this run)"
+
+          echo ""
+          echo "========================================"
+          echo "WEBGL"
+          echo "========================================"
+          find builds/webgl -maxdepth 6 -print 2>/dev/null || echo "(not built this run)"
+
+
+      # ========================================================
+      # INSTALL BUTLER
+      # ========================================================
+
+      - name: Install Butler
+        shell: bash
+        run: |
+          set -e
+
+          curl -L \
+            -o butler.zip \
+            https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default
+
+          unzip -o butler.zip -d butler
+
+          chmod +x butler/butler
+
+          echo "${GITHUB_WORKSPACE}/butler" >> "$GITHUB_PATH"
+
+
+      # ========================================================
+      # VERIFY BUTLER
+      # ========================================================
+
+      - name: Verify Butler
+        shell: bash
+        run: |
+          butler -V
+
+
+      # ========================================================
+      # PUSH WINDOWS
+      # ========================================================
+
+      - name: Push Windows to itch.io
+        if: inputs.platforms == 'All' || inputs.platforms == 'Windows' || inputs.platforms == ''
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+        shell: bash
+        run: |
+          set -e
+
+          butler push \
+            builds/windows \
+            "${ITCH_USER}/${ITCH_GAME}:${ITCH_CHANNEL_WINDOWS}" \
+            --userversion "${{ steps.version.outputs.value }}"
+
+
+      # ========================================================
+      # PUSH MACOS
+      # ========================================================
+
+      - name: Push macOS to itch.io
+        if: inputs.platforms == 'All' || inputs.platforms == 'macOS' || inputs.platforms == ''
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+        shell: bash
+        run: |
+          set -e
+
+          butler push \
+            builds/macos \
+            "${ITCH_USER}/${ITCH_GAME}:${ITCH_CHANNEL_MAC}" \
+            --userversion "${{ steps.version.outputs.value }}"
+
+
+      # ========================================================
+      # PUSH WEBGL
+      # ========================================================
+
+      - name: Push WebGL to itch.io
+        if: inputs.platforms == 'All' || inputs.platforms == 'WebGL' || inputs.platforms == ''
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+        shell: bash
+        run: |
+          set -e
+
+          butler push \
+            builds/webgl \
+            "${ITCH_USER}/${ITCH_GAME}:${ITCH_CHANNEL_WEBGL}" \
+            --userversion "${{ steps.version.outputs.value }}"
+
+
+
+  # ============================================================
+  # GITHUB RELEASE
+  # ============================================================
+
+  github-release:
+    name: Publish GitHub Release
+
+    needs:
+      - build
+      - deploy
+
+    if: inputs.release_tag != ''
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # ========================================================
+      # DOWNLOAD WINDOWS
+      # ========================================================
+
+      - name: Download Windows build
+        if: inputs.platforms == 'All' || inputs.platforms == 'Windows' || inputs.platforms == ''
+        uses: actions/download-artifact@v4
+        with:
+          name: Build-Windows
+          path: builds/Windows
+
+
+      # ========================================================
+      # DOWNLOAD MACOS
+      # ========================================================
+
+      - name: Download macOS build
+        if: inputs.platforms == 'All' || inputs.platforms == 'macOS' || inputs.platforms == ''
+        uses: actions/download-artifact@v4
+        with:
+          name: Build-macOS
+          path: builds/macOS
+
+
+      # ========================================================
+      # DOWNLOAD WEBGL
+      # ========================================================
+
+      - name: Download WebGL build
+        if: inputs.platforms == 'All' || inputs.platforms == 'WebGL' || inputs.platforms == ''
+        uses: actions/download-artifact@v4
+        with:
+          name: Build-WebGL
+          path: builds/WebGL
+
+
+      # ========================================================
+      # ZIP BUILDS
+      # ========================================================
+
+      - name: Zip platform builds
+        shell: bash
+        run: |
+          set -e
+
+          cd builds
+
+          [ -d Windows ] && zip -r "../${{ inputs.release_tag }}-Windows.zip" Windows
+          [ -d macOS ] && zip -r "../${{ inputs.release_tag }}-macOS.zip" macOS
+          [ -d WebGL ] && zip -r "../${{ inputs.release_tag }}-WebGL.zip" WebGL
+
+
+      # ========================================================
+      # CREATE GITHUB RELEASE
+      # ========================================================
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.release_tag }}
+          name: ${{ inputs.release_tag }}
+          files: |
+            *.zip
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+
+
+
+  # ============================================================
+  # DISCORD NOTIFICATION
+  # ============================================================
+
+  notify:
+    name: Notify Discord
+
+    needs:
+      - deploy
+
+    if: needs.deploy.result == 'success'
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # ========================================================
+      # GENERATE GEMINI MESSAGE
+      # ========================================================
+
+      - name: Generate flavor text with Gemini
+        id: flavor
+
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          VERSION: ${{ needs.deploy.outputs.version }}
+          PLATFORMS_INPUT: ${{ inputs.platforms }}
+
+        shell: bash
+
+        run: |
+          set -e
+
+          if [ -z "${PLATFORMS_INPUT}" ] || [ "${PLATFORMS_INPUT}" = "All" ]; then
+            PLATFORM_LIST="Windows, macOS, and Web"
+          else
+            PLATFORM_LIST="${PLATFORMS_INPUT}"
+          fi
+
+          if [ -n "${GEMINI_LANGUAGE}" ]; then
+            LANGUAGE_INSTRUCTION="Write the response in ${GEMINI_LANGUAGE}."
+          else
+            LANGUAGE_INSTRUCTION="Write the response in the same language used in the persona instructions above."
+          fi
+
+          PROMPT="${GEMINI_PERSONA}
+
+          Write ONE short paragraph (maximum 3 sentences, no markdown formatting, no surrounding quotation marks) announcing that a new build of the game \"${GAME_DISPLAY_NAME}\" version ${VERSION} has successfully been deployed to ${PLATFORM_LIST} on itch.io.
+
+          Match the tone and style of the persona above.
+          ${LANGUAGE_INSTRUCTION}"
+
+          BODY=$(jq -n \
+            --arg prompt "$PROMPT" \
+            '{
+              contents: [
+                {
+                  parts: [
+                    {
+                      text: $prompt
+                    }
+                  ]
+                }
+              ]
+            }')
+
+          RESPONSE=$(curl -sS -X POST \
+            "https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "$BODY")
+
+          TEXT=$(echo "$RESPONSE" | jq -r \
+            '.candidates[0].content.parts[0].text // empty')
+
+          if [ -z "$TEXT" ]; then
+            echo "Gemini failed."
+            echo ""
+            echo "Raw response:"
+            echo "$RESPONSE"
+
+            TEXT="Build baru ${GAME_DISPLAY_NAME} versi ${VERSION} sudah tayang di itch.io!"
+          fi
+
+          {
+            echo "text<<GEMINI_EOF"
+            echo "$TEXT"
+            echo "GEMINI_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+
+      # ========================================================
+      # SEND DISCORD
+      # ========================================================
+
+      - name: Send Discord notification
+
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL_DEPLOY }}
+          VERSION: ${{ needs.deploy.outputs.version }}
+          FLAVOR_TEXT: ${{ steps.flavor.outputs.text }}
+          PLATFORMS_INPUT: ${{ inputs.platforms }}
+
+        shell: bash
+
+        run: |
+          set -e
+
+          ITCH_URL="https://${ITCH_USER}.itch.io/${ITCH_GAME}"
+
+          if [ -z "${PLATFORMS_INPUT}" ] || [ "${PLATFORMS_INPUT}" = "All" ]; then
+            WIN_STATUS="✅"
+            MAC_STATUS="✅"
+            WEB_STATUS="✅"
+          else
+            WIN_STATUS="⏭️"
+            MAC_STATUS="⏭️"
+            WEB_STATUS="⏭️"
+            [ "${PLATFORMS_INPUT}" = "Windows" ] && WIN_STATUS="✅"
+            [ "${PLATFORMS_INPUT}" = "macOS" ] && MAC_STATUS="✅"
+            [ "${PLATFORMS_INPUT}" = "WebGL" ] && WEB_STATUS="✅"
+          fi
+
+          PAYLOAD=$(jq -n \
+            --arg content "$FLAVOR_TEXT" \
+            --arg title "${GAME_DISPLAY_NAME} — Build ${VERSION} deployed" \
+            --arg url "$ITCH_URL" \
+            --arg win "$WIN_STATUS" \
+            --arg mac "$MAC_STATUS" \
+            --arg web "$WEB_STATUS" \
+            '{
+              embeds: [
+                {
+                  title: $title,
+                  url: $url,
+                  description: $content,
+                  color: 5814783,
+                  fields: [
+                    {
+                      name: "Windows",
+                      value: $win,
+                      inline: true
+                    },
+                    {
+                      name: "macOS",
+                      value: $mac,
+                      inline: true
+                    },
+                    {
+                      name: "Web",
+                      value: $web,
+                      inline: true
+                    }
+                  ]
+                }
+              ]
+            }')
+
+          curl -sS \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" \
+            "$DISCORD_WEBHOOK_URL"

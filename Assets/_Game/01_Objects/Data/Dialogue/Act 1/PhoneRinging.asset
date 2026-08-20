@@ -17,3 +17,9 @@ MonoBehaviour:
   - speaker: 2
     text: '*telepon berdengung* '
     autoAdvanceDelay: 0
+  - speaker: 2
+    text: btw, itu ada kotak gede di pojok ruangan, tabrak aja
+    autoAdvanceDelay: 0
+  - speaker: 2
+    text: itu jumpscare trigger
+    autoAdvanceDelay: 0

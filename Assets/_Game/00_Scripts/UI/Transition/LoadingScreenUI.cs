@@ -1,18 +1,12 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using TMPro;
 using Slafurry.System;
 using Slafurry.System.Scene;
 
 namespace Slafurry.UI
 {
-    /// <summary>
-    /// Pure UI observer for LoadingSystem - has zero knowledge of the
-    /// boot/late-batch logic itself, only reacts to its events. Should be
-    /// a child of the persistent "===SYSTEM===" GameObject so it survives
-    /// scene transitions and can react to late-batch loading too (e.g.
-    /// Player spawning fresh in a new scene after the initial boot).
-    /// </summary>
     [RequireComponent(typeof(CanvasGroup))]
     public class LoadingScreenUI : MonoBehaviour
     {
@@ -20,8 +14,12 @@ namespace Slafurry.UI
         [SerializeField] private Slider progressSlider;
         [SerializeField] private TMP_Text statusText;
 
-        [Tooltip("Small delay after OnLoadingComplete before hiding, so 100% is visible for a beat instead of vanishing instantly.")]
         [SerializeField] private float hideDelay = 0.3f;
+
+        [SerializeField] private string[] excludedScenes;
+
+        private string currentLoadingScene;
+        private bool isCurrentSceneExcluded;
 
         private void Awake()
         {
@@ -41,7 +39,6 @@ namespace Slafurry.UI
                 SceneLoader.Instance.OnSceneLoadProgress += HandleSceneLoadProgress;
                 SceneLoader.Instance.OnSceneLoadCompleted += HandleSceneLoadCompleted;
             }
-
         }
 
         private void OnDisable()
@@ -61,36 +58,72 @@ namespace Slafurry.UI
             }
         }
 
+        private bool IsSceneExcluded(string sceneName)
+        {
+            if (excludedScenes == null || excludedScenes.Length == 0)
+                return false;
+
+            for (int i = 0; i < excludedScenes.Length; i++)
+            {
+                if (string.Equals(excludedScenes[i], sceneName, global::System.StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+
+            return false;
+        }
+
+ 
+        private bool IsActiveSceneExcluded()
+        {
+            return IsSceneExcluded(SceneManager.GetActiveScene().name);
+        }
+
         private void HandleProgressChanged(float value)
         {
+            if (IsActiveSceneExcluded())
+                return;
+
             if (progressSlider != null)
                 progressSlider.value = value;
 
-            // any progress update means loading is (re)active - e.g. a
-            // late batch just started during a scene transition
             Show();
         }
 
         private void HandleStatusChanged(string text)
         {
+            if (IsActiveSceneExcluded())
+                return;
+
             if (statusText != null)
                 statusText.text = text;
         }
 
         private void HandleLoadingComplete()
         {
+            if (IsActiveSceneExcluded())
+                return;
+
             CancelInvoke(nameof(Hide));
             Invoke(nameof(Hide), hideDelay);
         }
 
         private void HandleSceneLoadStarted(string sceneName)
         {
+            currentLoadingScene = sceneName;
+            isCurrentSceneExcluded = IsSceneExcluded(sceneName);
+
+            if (isCurrentSceneExcluded)
+                return;
+
             statusText.text = $"Loading {sceneName}...";
             Show();
         }
 
         private void HandleSceneLoadProgress(float progress)
         {
+            if (isCurrentSceneExcluded)
+                return;
+
             if (progressSlider != null)
                 progressSlider.value = progress;
 
@@ -99,6 +132,14 @@ namespace Slafurry.UI
 
         private void HandleSceneLoadCompleted(string sceneName)
         {
+            bool wasExcluded = isCurrentSceneExcluded;
+
+            currentLoadingScene = null;
+            isCurrentSceneExcluded = false;
+
+            if (wasExcluded)
+                return;
+
             CancelInvoke(nameof(Hide));
             Invoke(nameof(Hide), hideDelay);
         }

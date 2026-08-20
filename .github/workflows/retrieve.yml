@@ -1,0 +1,176 @@
+name: Retrieve New Drive Files
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  retrieve:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - run: pip install -r requirements.txt
+
+      # Always start from the latest main
+      - name: Sync latest main state & assets
+        run: |
+          git fetch origin main
+          rm -rf state \
+            Assets/_Game/02_Art/Sprite \
+            Assets/_Game/03_Audio \
+            Assets/_Game/02_Art/Mesh 
+          mkdir -p \
+            state \
+            Assets/_Game/02_Art/Sprite \
+            Assets/_Game/03_Audio \
+            Assets/_Game/02_Art/Mesh 
+          git archive origin/main -- state 2>/dev/null | tar -x || true
+          git archive origin/main -- Assets/_Game/02_Art/Sprite 2>/dev/null | tar -x || true
+          git archive origin/main -- Assets/_Game/03_Audio 2>/dev/null | tar -x || true
+          git archive origin/main -- Assets/_Game/02_Art/Mesh 2>/dev/null | tar -x || true
+
+      - name: Retrieve new sprite files
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+          GEMINI_PERSONA: ${{ secrets.GEMINI_PERSONA }}
+        run: |
+          python retrieve.py \
+            --drive-folder-id "${{ secrets.DRIVE_SPRITE_FOLDER_ID }}" \
+            --service-account-b64 "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON_B64 }}" \
+            --state-file "state/sprite_manifest.json" \
+            --download-dir "Assets/_Game/02_Art/Sprite" \
+            --project-name "${{ github.repository }} (sprite)" \
+            --discord-webhook "${{ secrets.DISCORD_WEBHOOK_URL }}"
+
+      - name: Retrieve new audio files
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+          GEMINI_PERSONA: ${{ secrets.GEMINI_PERSONA }}
+        run: |
+          python retrieve.py \
+            --drive-folder-id "${{ secrets.DRIVE_AUDIO_FOLDER_ID }}" \
+            --service-account-b64 "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON_B64 }}" \
+            --state-file "state/audio_manifest.json" \
+            --download-dir "Assets/_Game/03_Audio" \
+            --project-name "${{ github.repository }} (audio)" \
+            --discord-webhook "${{ secrets.DISCORD_WEBHOOK_URL }}"
+
+      - name: Retrieve new mesh files
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+          GEMINI_PERSONA: ${{ secrets.GEMINI_PERSONA }}
+        run: |
+          python retrieve.py \
+            --drive-folder-id "${{ secrets.DRIVE_MESH_FOLDER_ID }}" \
+            --service-account-b64 "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON_B64 }}" \
+            --state-file "state/mesh_manifest.json" \
+            --download-dir "Assets/_Game/02_Art/Mesh" \
+            --project-name "${{ github.repository }} (mesh)" \
+            --discord-webhook "${{ secrets.DISCORD_WEBHOOK_URL }}"
+
+      - name: Commit retrieved files to chore/asset
+        id: commit
+        env:
+          BOT_GIT_USERNAME: ${{ vars.BOT_GIT_USERNAME || 'Kei Tendou' }}
+          BOT_GIT_EMAIL: ${{ vars.BOT_GIT_EMAIL || 'Slafurry[bot]@users.noreply.github.com' }}
+        run: |
+          git config user.name "$BOT_GIT_USERNAME"
+          git config user.email "$BOT_GIT_EMAIL"
+
+          git fetch origin main
+
+          WORKTREE=/tmp/chore-asset
+
+          # Always recreate chore/asset from latest main.
+          # This avoids inheriting the broken branch history/state.
+          git branch -D chore/asset 2>/dev/null || true
+          git push origin --delete chore/asset 2>/dev/null || true
+
+          git worktree add -b chore/asset "$WORKTREE" origin/main
+
+          mkdir -p \
+            "$WORKTREE/state" \
+            "$WORKTREE/Assets/_Game/02_Art/Sprite" \
+            "$WORKTREE/Assets/_Game/03_Audio" \
+            "$WORKTREE/Assets/_Game/02_Art/Mesh" 
+
+          cp -f state/*.json \
+            "$WORKTREE/state/" 2>/dev/null || true
+
+          cp -rf Assets/_Game/02_Art/Sprite/. \
+            "$WORKTREE/Assets/_Game/02_Art/Sprite/" 2>/dev/null || true
+
+          cp -rf Assets/_Game/03_Audio/. \
+            "$WORKTREE/Assets/_Game/03_Audio/" 2>/dev/null || true
+
+          cp -rf Assets/_Game/02_Art/Mesh/. \
+            "$WORKTREE/Assets/_Game/02_Art/Mesh/" 2>/dev/null || true
+
+          cd "$WORKTREE"
+
+          git add \
+            state/ \
+            Assets/_Game/02_Art/Sprite \
+            Assets/_Game/03_Audio \
+            Assets/_Game/02_Art/Mesh 
+
+          if git diff --cached --quiet; then
+            echo "No changes, skipping."
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git commit -m "chore(assets): retrieve new drive files [skip ci]"
+          git push origin HEAD:chore/asset
+
+          echo "has_changes=true" >> "$GITHUB_OUTPUT"
+
+      - name: Create PR
+        if: steps.commit.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.PR_PAT || secrets.GITHUB_TOKEN }}
+        run: |
+          cd /tmp/chore-asset
+
+          TITLE="chore(assets): retrieve new drive files"
+          BODY="Automated asset sync from Google Drive.
+
+          Last updated: $(date -u +'%Y-%m-%d %H:%M UTC')"
+
+          OPEN_PR=$(gh pr list \
+            --head chore/asset \
+            --state open \
+            --repo "${{ github.repository }}" \
+            --json number \
+            --jq '.[0].number')
+
+          if [ -n "$OPEN_PR" ]; then
+            echo "Open PR #$OPEN_PR already exists, updating it."
+            gh pr edit "$OPEN_PR" \
+              --title "$TITLE" \
+              --body "$BODY" \
+              --repo "${{ github.repository }}"
+          else
+            echo "No open PR found, creating a new one."
+            gh pr create \
+              --base main \
+              --head chore/asset \
+              --title "$TITLE" \
+              --body "$BODY" \
+              --repo "${{ github.repository }}"
+          fi
