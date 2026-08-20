@@ -1,41 +1,67 @@
-// using System;
-// using System.Collections.Generic;
-// using UnityEngine;
+using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
 
-// public class PlayerInventory : MonoBehaviour
-// {
-//     public static PlayerInventory instance;
+public class PlayerInventory : MonoBehaviour
+{
+    [Header("Inventory")]
+    [SerializeField] private int maxItems = 3;
+    [SerializeField] private List<GameObject> items = new();
 
-//     public float notificationDuration = 2f;
+    [Header("Full Inventory Prompt")]
+    [SerializeField] private string fullInventoryMessage = "Inventory is full.";
+    private PromptText promptText;
+    public int ItemCount => items.Count;
+    public int MaxItems => maxItems;
 
-//     // Case-insensitive + trim biar typo kapital/spasi gak bikin item dianggap beda
-//     private readonly HashSet<string> collectedItems = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+    void Awake()
+    {
+        promptText = FindAnyObjectByType<PromptText>();
+    }
 
-//     void Awake()
-//     {
-//         instance = this;
-//     }
+    public bool Add(GameObject item)
+    {
+        if (item == null || items.Contains(item))
+            return false;
 
-//     public void CollectItem(string itemName, string displayLabel = null)
-//     {
-//         string key = Normalize(itemName);
-//         if (string.IsNullOrEmpty(key) || collectedItems.Contains(key)) return;
-//         collectedItems.Add(key);
+        if (items.Count >= maxItems)
+        {
+            ShowFullInventoryMessage();
+            return false;
+        }
 
-//         string label = string.IsNullOrEmpty(displayLabel) ? itemName : displayLabel;
-//         if (PlayerInteractor.instance != null)
-//         {
-//             PlayerInteractor.instance.ShowTemporaryMessage($"{label} collected", notificationDuration);
-//         }
-//     }
+        items.Add(item);
+        return true;
+    }
 
-//     public bool HasItem(string itemName)
-//     {
-//         return collectedItems.Contains(Normalize(itemName));
-//     }
+    public void Remove(GameObject item)
+    {
+        if (item == null)
+            return;
 
-//     private string Normalize(string name)
-//     {
-//         return name == null ? string.Empty : name.Trim();
-//     }
-// }
+        items.Remove(item);
+    }
+
+    public bool Has(GameObject item)
+    {
+        return item != null && items.Contains(item);
+    }
+
+    public GameObject GetItem(int index)
+    {
+        if (index < 0 || index >= items.Count)
+            return null;
+
+        return items[index];
+    }
+
+    public void Clear()
+    {
+        items.Clear();
+    }
+
+    private void ShowFullInventoryMessage()
+    {
+        promptText.Show(fullInventoryMessage);
+    }
+}

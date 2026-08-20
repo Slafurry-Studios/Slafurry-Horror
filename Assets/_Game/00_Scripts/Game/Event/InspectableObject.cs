@@ -17,7 +17,7 @@ public class InspectableObject : MonoBehaviour, IInteractable
     [Header("Events")]
     public InspectEvent OnInspect;
 
-    [SerializeField] private InspectHUD inspectHUD;
+    private InspectHUD inspectHUD;
 
     void Awake()
     {
