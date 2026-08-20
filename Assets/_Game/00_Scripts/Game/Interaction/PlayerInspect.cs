@@ -211,7 +211,7 @@ public class PlayerInspect : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
-        if (firstPersonLook != null) firstPersonLook.LockRotasi();
+        if (firstPersonLook != null) firstPersonLook.LockRotation();
 
         if (playerMovement != null)
         {
@@ -307,7 +307,7 @@ public class PlayerInspect : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
-        if (firstPersonLook != null) firstPersonLook.UnlockRotasi();
+        if (firstPersonLook != null) firstPersonLook.UnlockRotation();
 
         if (playerMovement != null && freezeMovementFunc != null)
         {
