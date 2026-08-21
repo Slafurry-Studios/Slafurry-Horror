@@ -26,7 +26,12 @@ public class PlayerInventory : MonoBehaviour
     void Start()
     {
         PlayerInventory data = PlayerManager.Instance.PlayerInventory;
-        items = data?.Items;
+
+        // Fallback ke list baru kalau data null, dan buang referensi
+        // yang sudah destroyed (fake-null) supaya tidak ada "slot hantu"
+        // yang bikin GetItem() mengembalikan objek mati.
+        items = data?.Items ?? new List<GameObject>();
+        items.RemoveAll(item => item == null);
 
         PlayerManager.Instance.SetPlayerInventory(this);
     }

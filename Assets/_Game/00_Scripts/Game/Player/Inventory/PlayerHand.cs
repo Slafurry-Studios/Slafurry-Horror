@@ -9,25 +9,28 @@ public class PlayerHand : MonoBehaviour
 
     [Header("Drop")]
     [SerializeField] private float dropForce = 2f;
+
     public int currentSlot = -1;
+
     private GameObject currentItem;
+    private GameObject currentOriginalItem;
 
     public int CurrentSlot => currentSlot;
     public GameObject CurrentItem => currentItem;
-    void Start()
+
+    private void Start()
     {
-        PlayerHand data = PlayerManager.Instance.PlayerHand;
-        int targetSlot = data != null ? data.CurrentSlot : -1;
+        PlayerManager manager = PlayerManager.Instance;
 
-        currentSlot = -1;
-        currentItem = null;
+        inventory = manager.PlayerInventory;
 
-        PlayerManager.Instance.SetPlayerHand(this);
+        int targetSlot = manager.CurrentSlot;
+
+        manager.SetPlayerHand(this);
 
         if (targetSlot >= 0)
             SelectSlot(targetSlot);
     }
-
 
     private void Update()
     {
@@ -49,19 +52,6 @@ public class PlayerHand : MonoBehaviour
             DropCurrentItem();
     }
 
-    public void DetachCarriedItemForSceneTransition()
-    {
-        if (currentItem == null)
-            return;
-
-        PlayerManager manager = PlayerManager.Instance;
-
-        if (manager == null || manager.InventoryContainer == null)
-            return;
-
-        currentItem.transform.SetParent(manager.InventoryContainer);
-    }
-
     public void SelectSlot(int slot)
     {
         if (inventory == null)
@@ -81,64 +71,92 @@ public class PlayerHand : MonoBehaviour
         Equip(item, slot);
     }
 
-    private void Unequip()
+    private void Equip(GameObject originalItem, int slot)
     {
-        if (currentItem != null)
-            currentItem.SetActive(false);
-
-        currentItem = null;
-        currentSlot = -1;
-    }
-    private void Equip(GameObject item, int slot)
-    {
-        if (currentItem != null)
-            currentItem.SetActive(false);
+        Unequip();
 
         currentSlot = slot;
-        currentItem = item;
+        currentOriginalItem = originalItem;
+
+        // Original tetap berada di inventory.
+        // Yang masuk ke tangan hanyalah clone.
+        currentItem = Instantiate(
+            originalItem,
+            handTransform
+        );
+
+        currentItem.name = originalItem.name + " (Hand)";
+
+        currentItem.transform.localPosition = Vector3.zero;
+        currentItem.transform.localRotation = Quaternion.identity;
+        currentItem.transform.localScale = originalItem.transform.localScale;
 
         Rigidbody rb = currentItem.GetComponent<Rigidbody>();
 
         if (rb != null)
         {
-            rb.velocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
             rb.isKinematic = true;
             rb.detectCollisions = false;
+            rb.velocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
         }
 
-        currentItem.transform.SetParent(handTransform);
-        currentItem.transform.localPosition = Vector3.zero;
-        currentItem.transform.localRotation = Quaternion.identity;
         currentItem.SetActive(true);
+
+        PlayerManager.Instance.SetCurrentSlot(slot);
+    }
+
+    private void Unequip()
+    {
+        if (currentItem != null)
+        {
+            Destroy(currentItem);
+            currentItem = null;
+        }
+
+        currentOriginalItem = null;
+        currentSlot = -1;
+
+        PlayerManager.Instance.SetCurrentSlot(-1);
     }
 
     public void DropCurrentItem()
     {
-        if (currentItem == null || inventory == null)
+        if (currentOriginalItem == null || inventory == null)
             return;
 
-        GameObject item = currentItem;
+        GameObject originalItem = currentOriginalItem;
 
-        inventory.Remove(item);
+        // Hapus visual di tangan.
+        if (currentItem != null)
+        {
+            Destroy(currentItem);
+            currentItem = null;
+        }
 
-        currentItem = null;
+        // Hapus dari inventory.
+        inventory.Remove(originalItem);
+
+        currentOriginalItem = null;
         currentSlot = -1;
 
-        item.transform.SetParent(null);
+        PlayerManager.Instance.SetCurrentSlot(-1);
+
+        // Keluarkan original dari inventory container.
+        originalItem.transform.SetParent(null);
 
         if (dropTransform != null)
         {
-            item.transform.position = dropTransform.position;
-            item.transform.rotation = dropTransform.rotation;
+            originalItem.transform.position = dropTransform.position;
+            originalItem.transform.rotation = dropTransform.rotation;
         }
 
-        item.SetActive(true);
+        originalItem.SetActive(true);
 
-        Rigidbody rb = item.GetComponent<Rigidbody>();
+        Rigidbody rb = originalItem.GetComponent<Rigidbody>();
 
         if (rb == null)
-            rb = item.AddComponent<Rigidbody>();
+            rb = originalItem.AddComponent<Rigidbody>();
 
         rb.isKinematic = false;
         rb.detectCollisions = true;
@@ -157,7 +175,7 @@ public class PlayerHand : MonoBehaviour
 
     public GameObject GetCurrentItem()
     {
-        return currentItem;
+        return currentOriginalItem;
     }
 
     public int GetCurrentSlot()
