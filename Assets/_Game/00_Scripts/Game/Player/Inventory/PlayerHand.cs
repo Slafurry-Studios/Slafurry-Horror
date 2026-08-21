@@ -125,38 +125,43 @@ public class PlayerHand : MonoBehaviour
         if (currentOriginalItem == null || inventory == null)
             return;
 
-        GameObject originalItem = currentOriginalItem;
+        GameObject item = currentOriginalItem;
 
-        // Hapus visual di tangan.
+        // Remove dari inventory terlebih dahulu.
+        inventory.Remove(item);
+
+        // Hapus clone yang ada di tangan.
         if (currentItem != null)
         {
             Destroy(currentItem);
             currentItem = null;
         }
 
-        // Hapus dari inventory.
-        inventory.Remove(originalItem);
-
         currentOriginalItem = null;
         currentSlot = -1;
 
         PlayerManager.Instance.SetCurrentSlot(-1);
 
-        // Keluarkan original dari inventory container.
-        originalItem.transform.SetParent(null);
+        // Keluarkan original dari InventoryContainer.
+        item.transform.SetParent(null);
 
+        // Tentukan posisi drop.
         if (dropTransform != null)
         {
-            originalItem.transform.position = dropTransform.position;
-            originalItem.transform.rotation = dropTransform.rotation;
+            item.transform.SetPositionAndRotation(
+                dropTransform.position,
+                dropTransform.rotation
+            );
         }
 
-        originalItem.SetActive(true);
+        // Aktifkan object asli.
+        item.SetActive(true);
 
-        Rigidbody rb = originalItem.GetComponent<Rigidbody>();
+        // Aktifkan physics.
+        Rigidbody rb = item.GetComponent<Rigidbody>();
 
         if (rb == null)
-            rb = originalItem.AddComponent<Rigidbody>();
+            rb = item.AddComponent<Rigidbody>();
 
         rb.isKinematic = false;
         rb.detectCollisions = true;
@@ -164,6 +169,7 @@ public class PlayerHand : MonoBehaviour
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
 
+        // Lempar sedikit ke depan.
         if (dropTransform != null)
         {
             rb.AddForce(
