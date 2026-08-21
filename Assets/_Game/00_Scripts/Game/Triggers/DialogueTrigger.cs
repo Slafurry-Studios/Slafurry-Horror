@@ -4,7 +4,6 @@ using UnityEngine.Events;
 public class DialogueTrigger : BaseTrigger
 {
     [SerializeField] private DialogueData dialogue;
-    [SerializeField] private bool playOnce = true;
     [SerializeField] private UnityEvent onComplete;
     public void TryPlay()
     {

@@ -726,4 +726,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inventory: {fileID: 7585595265516850676}
-  handTransform: {fileID: 0}
+  handTransform: {fileID: 4459406783332810839}
+  dropTransform: {fileID: 0}
+  dropForce: 2

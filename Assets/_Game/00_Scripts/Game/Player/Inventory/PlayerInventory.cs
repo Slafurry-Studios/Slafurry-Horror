@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
+[DefaultExecutionOrder(-100)]
 public class PlayerInventory : MonoBehaviour
 {
     [Header("Inventory")]
@@ -11,12 +12,23 @@ public class PlayerInventory : MonoBehaviour
     [Header("Full Inventory Prompt")]
     [SerializeField] private string fullInventoryMessage = "Inventory is full.";
     private PromptText promptText;
+
+    public List<GameObject> Items => items;
     public int ItemCount => items.Count;
     public int MaxItems => maxItems;
 
-    void Awake()
+    private void Awake()
     {
         promptText = FindAnyObjectByType<PromptText>();
+
+    }
+
+    void Start()
+    {
+        PlayerInventory data = PlayerManager.Instance.PlayerInventory;
+        items = data?.Items;
+
+        PlayerManager.Instance.SetPlayerInventory(this);
     }
 
     public bool Add(GameObject item)
@@ -31,6 +43,14 @@ public class PlayerInventory : MonoBehaviour
         }
 
         items.Add(item);
+
+        Transform container = PlayerManager.Instance.InventoryContainer;
+
+        if (container != null)
+            item.transform.SetParent(container);
+
+        item.SetActive(false);
+
         return true;
     }
 

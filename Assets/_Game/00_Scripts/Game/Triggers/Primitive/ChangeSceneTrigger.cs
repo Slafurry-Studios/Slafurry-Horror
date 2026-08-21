@@ -8,6 +8,7 @@ public class ChangeSceneTrigger : BaseTrigger
     public void ChangeScene()
     {
         if (!CanTrigger()) return;
+
         SceneLoader.Instance.LoadScene(sceneName);
         AddTriggerCount();
     }

@@ -10,14 +10,13 @@ public class LookAtController : MonoBehaviour
     public float bodyWeight = 0.5f;
 
     [Header("Smooth Settings")]
-    public float smoothSpeed = 3f; // kecepatan transisi
+    public float smoothSpeed = 3f;
 
     private Animator animator;
     private bool isActive = false;
 
     private float currentLookWeight = 0f;
 
-    // target sementara, dipakai untuk transisi keluar
     private Transform lastTarget;
 
     void Start()
@@ -29,19 +28,16 @@ public class LookAtController : MonoBehaviour
     {
         float targetWeight = (isActive && objectToLookAt != null) ? 1f : 0f;
 
-        // transisi halus
         currentLookWeight = Mathf.Lerp(currentLookWeight, targetWeight, Time.deltaTime * smoothSpeed);
 
         animator.SetLookAtWeight(currentLookWeight, bodyWeight, headWeight);
 
-        // gunakan target lama sampai weight benar-benar 0
         if ((objectToLookAt != null || lastTarget != null) && currentLookWeight > 0.01f)
         {
             Transform target = objectToLookAt != null ? objectToLookAt : lastTarget;
             animator.SetLookAtPosition(target.position);
         }
 
-        // kalau sudah habis weightnya, reset lastTarget
         if (currentLookWeight <= 0.01f)
         {
             lastTarget = null;
@@ -63,8 +59,8 @@ public class LookAtController : MonoBehaviour
         if (other.CompareTag("Face"))
         {
             isActive = false;
-            lastTarget = objectToLookAt; // simpan dulu
-            objectToLookAt = null;       // kosongkan target aktif
+            lastTarget = objectToLookAt;
+            objectToLookAt = null;
         }
     }
 }
