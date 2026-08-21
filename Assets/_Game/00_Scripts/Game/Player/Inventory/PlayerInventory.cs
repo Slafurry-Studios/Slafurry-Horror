@@ -1,41 +1,92 @@
-// using System;
-// using System.Collections.Generic;
-// using UnityEngine;
+using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
 
-// public class PlayerInventory : MonoBehaviour
-// {
-//     public static PlayerInventory instance;
+[DefaultExecutionOrder(-100)]
+public class PlayerInventory : MonoBehaviour
+{
+    [Header("Inventory")]
+    [SerializeField] private int maxItems = 3;
+    [SerializeField] private List<GameObject> items = new();
 
-//     public float notificationDuration = 2f;
+    [Header("Full Inventory Prompt")]
+    [SerializeField] private string fullInventoryMessage = "Inventory is full.";
+    private PromptText promptText;
 
-//     // Case-insensitive + trim biar typo kapital/spasi gak bikin item dianggap beda
-//     private readonly HashSet<string> collectedItems = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+    public List<GameObject> Items => items;
+    public int ItemCount => items.Count;
+    public int MaxItems => maxItems;
 
-//     void Awake()
-//     {
-//         instance = this;
-//     }
+    private void Awake()
+    {
+        promptText = FindAnyObjectByType<PromptText>();
 
-//     public void CollectItem(string itemName, string displayLabel = null)
-//     {
-//         string key = Normalize(itemName);
-//         if (string.IsNullOrEmpty(key) || collectedItems.Contains(key)) return;
-//         collectedItems.Add(key);
+    }
 
-//         string label = string.IsNullOrEmpty(displayLabel) ? itemName : displayLabel;
-//         if (PlayerInteractor.instance != null)
-//         {
-//             PlayerInteractor.instance.ShowTemporaryMessage($"{label} collected", notificationDuration);
-//         }
-//     }
+    void Start()
+    {
+        PlayerInventory data = PlayerManager.Instance.PlayerInventory;
 
-//     public bool HasItem(string itemName)
-//     {
-//         return collectedItems.Contains(Normalize(itemName));
-//     }
+        // Fallback ke list baru kalau data null, dan buang referensi
+        // yang sudah destroyed (fake-null) supaya tidak ada "slot hantu"
+        // yang bikin GetItem() mengembalikan objek mati.
+        items = data?.Items ?? new List<GameObject>();
+        items.RemoveAll(item => item == null);
 
-//     private string Normalize(string name)
-//     {
-//         return name == null ? string.Empty : name.Trim();
-//     }
-// }
+        PlayerManager.Instance.SetPlayerInventory(this);
+    }
+
+    public bool Add(GameObject item)
+    {
+        if (item == null || items.Contains(item))
+            return false;
+
+        if (items.Count >= maxItems)
+        {
+            ShowFullInventoryMessage();
+            return false;
+        }
+
+        items.Add(item);
+
+        Transform container = PlayerManager.Instance.InventoryContainer;
+
+        if (container != null)
+            item.transform.SetParent(container);
+
+        item.SetActive(false);
+
+        return true;
+    }
+
+    public void Remove(GameObject item)
+    {
+        if (item == null)
+            return;
+
+        items.Remove(item);
+    }
+
+    public bool Has(GameObject item)
+    {
+        return item != null && items.Contains(item);
+    }
+
+    public GameObject GetItem(int index)
+    {
+        if (index < 0 || index >= items.Count)
+            return null;
+
+        return items[index];
+    }
+
+    public void Clear()
+    {
+        items.Clear();
+    }
+
+    private void ShowFullInventoryMessage()
+    {
+        promptText.Show(fullInventoryMessage);
+    }
+}
