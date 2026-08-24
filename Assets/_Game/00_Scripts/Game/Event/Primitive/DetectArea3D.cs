@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-[RequireComponent(typeof(BoxCollider))]
+[RequireComponent(typeof(Collider))]
 public class DetectArea3D : MonoBehaviour
 {
     [Header("On Trigger Enter")]

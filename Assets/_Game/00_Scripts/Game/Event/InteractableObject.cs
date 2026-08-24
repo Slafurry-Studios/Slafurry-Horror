@@ -22,14 +22,12 @@ public class InteractableObject : MonoBehaviour, IInteractable
     [SerializeField] private bool interactOnce;
 
     private PlayerHand playerHand;
-    private PromptText promptText;
 
     private bool hasBeenInteracted;
 
     void Awake()
     {
         playerHand = FindAnyObjectByType<PlayerHand>();
-        promptText = FindAnyObjectByType<PromptText>();
     }
 
     public void Interact()
@@ -40,7 +38,12 @@ public class InteractableObject : MonoBehaviour, IInteractable
         if (requireCondition && playerHand.GetCurrentItem() != requiredItem)
         {
             onRequirementFailed?.Invoke();
-            promptText.Show(failPromptText);
+
+            PlayerInteract.instance.ShowFailMessage(
+                failPromptText,
+                2f
+            );
+
             return;
         }
 
