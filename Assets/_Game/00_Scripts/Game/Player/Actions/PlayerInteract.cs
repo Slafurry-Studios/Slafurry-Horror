@@ -21,6 +21,7 @@ public class PlayerInteract : MonoBehaviour
 
     [Header("UI Prompt")]
     public TMP_Text promptText;
+    public TMP_Text failPromptText;
 
     [Header("Events")]
     public StringEvent OnPromptShown = new StringEvent();
@@ -47,6 +48,9 @@ public class PlayerInteract : MonoBehaviour
 
         if (promptText != null)
             promptText.enabled = false;
+
+        if (failPromptText != null)
+            failPromptText.enabled = false;
     }
 
     private void Update()
@@ -130,6 +134,25 @@ public class PlayerInteract : MonoBehaviour
         }
 
         ClearCurrentInteractable();
+    }
+
+    public void ShowFailMessage(string message, float duration)
+    {
+        if (failPromptText != null)
+            failPromptText.text = message;
+
+        if (failPromptText != null)
+            failPromptText.enabled = true;
+
+        StartCoroutine(HideFailMessageRoutine(duration));
+    }
+
+    private IEnumerator HideFailMessageRoutine(float duration)
+    {
+        yield return new WaitForSeconds(duration);
+
+        if (failPromptText != null)
+            failPromptText.enabled = false;
     }
 
     private void ClearCurrentInteractable()
