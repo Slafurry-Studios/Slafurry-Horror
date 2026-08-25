@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   track:
@@ -76,23 +77,74 @@ jobs:
             --state-file "state/texture_manifest.json" \
             --project-name "${{ github.repository }} (texture)"
 
-      - name: Commit updated state directly to main
+      - name: Commit state to chore/track-state
+        id: commit
         env:
           BOT_GIT_USERNAME: ${{ vars.BOT_GIT_USERNAME || 'Kei Tendou' }}
           BOT_GIT_EMAIL: ${{ vars.BOT_GIT_EMAIL || 'Slafurry[bot]@users.noreply.github.com' }}
-          PR_PAT: ${{ secrets.PR_PAT }}
         run: |
           git config user.name "$BOT_GIT_USERNAME"
           git config user.email "$BOT_GIT_EMAIL"
+
+          git fetch origin main
+
+          WORKTREE=/tmp/chore-track-state
+
+          # Always recreate the branch from latest main, same pattern
+          # as the retrieve workflow, so it never carries stale history.
+          git branch -D chore/track-state 2>/dev/null || true
+          git push origin --delete chore/track-state 2>/dev/null || true
+
+          git worktree add -b chore/track-state "$WORKTREE" origin/main
+
+          mkdir -p "$WORKTREE/state"
+          cp -f state/*.json "$WORKTREE/state/" 2>/dev/null || true
+
+          cd "$WORKTREE"
           git add state/
+
           if git diff --cached --quiet; then
             echo "No state changes, skipping."
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
+
           git commit -m "chore(assets): update drive state [skip ci]"
-          # Rebase on top of latest main in case something landed
-          # while this job was running, then push directly using
-          # the dedicated bot account's PAT so it clears the
-          # branch protection bypass list.
-          git pull --rebase origin main
-          git push "https://x-access-token:${PR_PAT}@github.com/${{ github.repository }}.git" HEAD:main
+          git push origin HEAD:chore/track-state
+
+          echo "has_changes=true" >> "$GITHUB_OUTPUT"
+
+      - name: Create PR
+        if: steps.commit.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.PR_PAT || secrets.GITHUB_TOKEN }}
+        run: |
+          cd /tmp/chore-track-state
+
+          TITLE="chore(assets): update drive state"
+          BODY="Automated Drive change-tracking state update.
+
+          Last updated: $(date -u +'%Y-%m-%d %H:%M UTC')"
+
+          OPEN_PR=$(gh pr list \
+            --head chore/track-state \
+            --state open \
+            --repo "${{ github.repository }}" \
+            --json number \
+            --jq '.[0].number')
+
+          if [ -n "$OPEN_PR" ]; then
+            echo "Open PR #$OPEN_PR already exists, updating it."
+            gh pr edit "$OPEN_PR" \
+              --title "$TITLE" \
+              --body "$BODY" \
+              --repo "${{ github.repository }}"
+          else
+            echo "No open PR found, creating a new one."
+            gh pr create \
+              --base main \
+              --head chore/track-state \
+              --title "$TITLE" \
+              --body "$BODY" \
+              --repo "${{ github.repository }}"
+          fi
