@@ -9,7 +9,8 @@
     "relative_path": "SFX/door (open).mp3",
     "retrieve_status": "downloaded",
     "downloaded_as": "SFX/door (open).mp3",
-    "downloaded_modified_time": "2026-08-17T06:51:21.720Z"
+    "downloaded_modified_time": "2026-08-17T06:51:21.720Z",
+    "status": "deleted_in_drive"
   },
   "1Rn6lZtdD-5xDL2n7_lMGZM-IbCs6IJPp": {
     "mimeType": "audio/mpeg",
@@ -21,7 +22,8 @@
     "relative_path": "SFX/tap-water.mp3",
     "retrieve_status": "downloaded",
     "downloaded_as": "SFX/tap-water.mp3",
-    "downloaded_modified_time": "2026-07-25T13:11:03.000Z"
+    "downloaded_modified_time": "2026-07-25T13:11:03.000Z",
+    "status": "deleted_in_drive"
   },
   "18y1WAWpHpki7BIeL19FxvPQAQ6DnnZiX": {
     "mimeType": "audio/wav",
@@ -33,7 +35,8 @@
     "relative_path": "SFX/footstep 1(indoor).wav",
     "retrieve_status": "downloaded",
     "downloaded_as": "SFX/footstep 1(indoor).wav",
-    "downloaded_modified_time": "2026-07-25T13:04:29.000Z"
+    "downloaded_modified_time": "2026-07-25T13:04:29.000Z",
+    "status": "deleted_in_drive"
   },
   "1W9hzDEmEUdh3O4GybEyUSwIdiO5-IXEP": {
     "mimeType": "audio/wav",
@@ -45,7 +48,8 @@
     "relative_path": "SFX/footstep 1(indoor)-2.wav",
     "retrieve_status": "downloaded",
     "downloaded_as": "SFX/footstep 1(indoor)-2.wav",
-    "downloaded_modified_time": "2026-07-25T13:04:29.000Z"
+    "downloaded_modified_time": "2026-07-25T13:04:29.000Z",
+    "status": "deleted_in_drive"
   },
   "18YcE1LPZQ78yqUAEjIie95WNpELZ5_uF": {
     "mimeType": "audio/mpeg",
@@ -57,7 +61,8 @@
     "relative_path": "SFX/footstep 1(outdoor).mp3",
     "retrieve_status": "downloaded",
     "downloaded_as": "SFX/footstep 1(outdoor).mp3",
-    "downloaded_modified_time": "2026-07-25T13:02:15.000Z"
+    "downloaded_modified_time": "2026-07-25T13:02:15.000Z",
+    "status": "deleted_in_drive"
   },
   "1rTsAX7uLfoHQPfh2Rko5HUpy01nkLl_n": {
     "mimeType": "audio/wav",
@@ -69,7 +74,8 @@
     "relative_path": "SFX/cricket-sound-113945.wav",
     "retrieve_status": "downloaded",
     "downloaded_as": "SFX/cricket-sound-113945.wav",
-    "downloaded_modified_time": "2026-07-25T12:54:09.000Z"
+    "downloaded_modified_time": "2026-07-25T12:54:09.000Z",
+    "status": "deleted_in_drive"
   },
   "1HV9JNnU6BfcAl4xZMqZVA-9xB3PPnE58": {
     "mimeType": "audio/wav",
@@ -81,7 +87,8 @@
     "relative_path": "SFX/Breath 1.wav",
     "retrieve_status": "downloaded",
     "downloaded_as": "SFX/Breath 1.wav",
-    "downloaded_modified_time": "2026-07-25T12:53:54.000Z"
+    "downloaded_modified_time": "2026-07-25T12:53:54.000Z",
+    "status": "deleted_in_drive"
   },
   "1cEdNtuW54e8xqHYZzjxYkrD3F0kSm8Q4": {
     "mimeType": "audio/wav",
@@ -93,7 +100,8 @@
     "relative_path": "SFX/Ambient (dead).wav",
     "retrieve_status": "downloaded",
     "downloaded_as": "SFX/Ambient (dead).wav",
-    "downloaded_modified_time": "2026-07-25T12:53:49.000Z"
+    "downloaded_modified_time": "2026-07-25T12:53:49.000Z",
+    "status": "deleted_in_drive"
   },
   "1USpBSrN7O0n8Yd7NvwUXAWCWVWUOgHAq": {
     "mimeType": "audio/wav",
@@ -105,7 +113,8 @@
     "relative_path": "SFX/vhs_tape_insert_sound_effect.wav",
     "retrieve_status": "downloaded",
     "downloaded_as": "SFX/vhs_tape_insert_sound_effect.wav",
-    "downloaded_modified_time": "2026-07-20T13:08:04.000Z"
+    "downloaded_modified_time": "2026-07-20T13:08:04.000Z",
+    "status": "deleted_in_drive"
   },
   "1p4Pj-in_vXh6s3rt4V33tOrvWhVX3lmC": {
     "mimeType": "audio/mpeg",
@@ -115,9 +124,7 @@
     "name": "(Main Menu) freesound_community-horror-ambient-14590.mp3",
     "modifiedTime": "2026-08-17T06:25:56.708Z",
     "relative_path": "BGM/(Main Menu) freesound_community-horror-ambient-14590.mp3",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "BGM/(Main Menu) freesound_community-horror-ambient-14590.mp3",
-    "downloaded_modified_time": "2026-08-17T06:25:56.708Z"
+    "retrieve_status": "downloaded"
   },
   "15EmM-AEJlPj7MeAn8RmgrmXacj_sgWjV": {
     "mimeType": "audio/mpeg",
@@ -127,9 +134,7 @@
     "name": "(Flashback) Waltz Op. 69 no. 2 in B minor.mp3",
     "modifiedTime": "2026-08-17T06:25:12.138Z",
     "relative_path": "BGM/(Flashback) Waltz Op. 69 no. 2 in B minor.mp3",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "BGM/(Flashback) Waltz Op. 69 no. 2 in B minor.mp3",
-    "downloaded_modified_time": "2026-08-17T06:25:12.138Z"
+    "retrieve_status": "downloaded"
   },
   "11aYLRNjhhmGxIx5Rp1UIBW8zOFGZZT_M": {
     "mimeType": "audio/flac",
@@ -139,9 +144,7 @@
     "name": "(Ending) Faure_Sicilienne_Chim's Arrangement.flac",
     "modifiedTime": "2026-08-17T06:24:57.082Z",
     "relative_path": "BGM/(Ending) Faure_Sicilienne_Chim's Arrangement.flac",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "BGM/(Ending) Faure_Sicilienne_Chim's Arrangement.flac",
-    "downloaded_modified_time": "2026-08-17T06:24:57.082Z"
+    "retrieve_status": "downloaded"
   },
   "167tdfoysOH4SnFAk3Vug6SQaEgW4vPj8": {
     "mimeType": "audio/mpeg",
@@ -153,7 +156,8 @@
     "relative_path": "SFX/broken glass.mp3",
     "retrieve_status": "downloaded",
     "downloaded_as": "SFX/broken glass.mp3",
-    "downloaded_modified_time": "2026-08-17T07:45:03.000Z"
+    "downloaded_modified_time": "2026-08-17T07:45:03.000Z",
+    "status": "deleted_in_drive"
   },
   "1WM7UdrqflHvQs4D0T2dBvh342vsm453F": {
     "mimeType": "audio/mpeg",
@@ -165,7 +169,8 @@
     "relative_path": "SFX/paper 3.mp3",
     "retrieve_status": "downloaded",
     "downloaded_as": "SFX/paper 3.mp3",
-    "downloaded_modified_time": "2026-08-17T07:40:06.000Z"
+    "downloaded_modified_time": "2026-08-17T07:40:06.000Z",
+    "status": "deleted_in_drive"
   },
   "1_9eDEBpb1sfkSBu4-q3jfKOneYp8laDR": {
     "mimeType": "audio/mpeg",
@@ -177,7 +182,8 @@
     "relative_path": "SFX/fork on plate.mp3",
     "retrieve_status": "downloaded",
     "downloaded_as": "SFX/fork on plate.mp3",
-    "downloaded_modified_time": "2026-08-17T07:39:12.000Z"
+    "downloaded_modified_time": "2026-08-17T07:39:12.000Z",
+    "status": "deleted_in_drive"
   },
   "1_5Bd2xzaiOWx2t6uQZpWL9Bb9FAFK8Ly": {
     "mimeType": "audio/mpeg",
@@ -189,7 +195,8 @@
     "relative_path": "SFX/door (locked).mp3",
     "retrieve_status": "downloaded",
     "downloaded_as": "SFX/door (locked).mp3",
-    "downloaded_modified_time": "2026-08-17T07:37:40.000Z"
+    "downloaded_modified_time": "2026-08-17T07:37:40.000Z",
+    "status": "deleted_in_drive"
   },
   "1FlgvNrP3iR87-rTtwkUtsEN_dFFt-ran": {
     "mimeType": "audio/mpeg",
@@ -201,7 +208,8 @@
     "relative_path": "SFX/door (closed).mp3",
     "retrieve_status": "downloaded",
     "downloaded_as": "SFX/door (closed).mp3",
-    "downloaded_modified_time": "2026-08-17T07:36:07.000Z"
+    "downloaded_modified_time": "2026-08-17T07:36:07.000Z",
+    "status": "deleted_in_drive"
   },
   "1hgwtUrLV1k32Z60zT8WRFpfXUpYdDedx": {
     "mimeType": "audio/mpeg",
@@ -213,7 +221,8 @@
     "relative_path": "SFX/event 1.mp3",
     "retrieve_status": "downloaded",
     "downloaded_as": "SFX/event 1.mp3",
-    "downloaded_modified_time": "2026-08-17T07:34:19.000Z"
+    "downloaded_modified_time": "2026-08-17T07:34:19.000Z",
+    "status": "deleted_in_drive"
   },
   "1PuwNojYOdN5FjQqcxF5y8i50u-E3gMGA": {
     "mimeType": "audio/mpeg",
@@ -225,7 +234,8 @@
     "relative_path": "SFX/jumpscare 1.mp3",
     "retrieve_status": "downloaded",
     "downloaded_as": "SFX/jumpscare 1.mp3",
-    "downloaded_modified_time": "2026-08-17T07:33:30.000Z"
+    "downloaded_modified_time": "2026-08-17T07:33:30.000Z",
+    "status": "deleted_in_drive"
   },
   "1rvFdFtKPzMYRTjPrF6HNLTZPvXtJBjN6": {
     "mimeType": "audio/mpeg",
@@ -237,7 +247,8 @@
     "relative_path": "SFX/jumpscare 2.mp3",
     "retrieve_status": "downloaded",
     "downloaded_as": "SFX/jumpscare 2.mp3",
-    "downloaded_modified_time": "2026-08-17T07:32:20.000Z"
+    "downloaded_modified_time": "2026-08-17T07:32:20.000Z",
+    "status": "deleted_in_drive"
   },
   "1WR2JDSlG4gbtnMZEL-OmeKDNuYPN3h2K": {
     "mimeType": "audio/mpeg",
@@ -249,7 +260,8 @@
     "relative_path": "SFX/button click.mp3",
     "retrieve_status": "downloaded",
     "downloaded_as": "SFX/button click.mp3",
-    "downloaded_modified_time": "2026-08-17T07:32:08.000Z"
+    "downloaded_modified_time": "2026-08-17T07:32:08.000Z",
+    "status": "deleted_in_drive"
   },
   "122p67Du3QyTaAWt4pg9a4PluYjhkSTGw": {
     "mimeType": "audio/mpeg",
@@ -261,7 +273,8 @@
     "relative_path": "SFX/radio noise.mp3",
     "retrieve_status": "downloaded",
     "downloaded_as": "SFX/radio noise.mp3",
-    "downloaded_modified_time": "2026-08-17T07:27:50.000Z"
+    "downloaded_modified_time": "2026-08-17T07:27:50.000Z",
+    "status": "deleted_in_drive"
   },
   "1vCsZ25fIb6o7AGVaCgh3T1CjJkN20ni4": {
     "mimeType": "audio/mpeg",
@@ -273,7 +286,8 @@
     "relative_path": "SFX/paper 1.mp3",
     "retrieve_status": "downloaded",
     "downloaded_as": "SFX/paper 1.mp3",
-    "downloaded_modified_time": "2026-08-17T07:27:16.000Z"
+    "downloaded_modified_time": "2026-08-17T07:27:16.000Z",
+    "status": "deleted_in_drive"
   },
   "1eMciuOrp1mq5FrVUITPTeBnUFFKEjPU1": {
     "mimeType": "audio/mpeg",
@@ -285,7 +299,8 @@
     "relative_path": "SFX/paper 2.mp3",
     "retrieve_status": "downloaded",
     "downloaded_as": "SFX/paper 2.mp3",
-    "downloaded_modified_time": "2026-08-17T07:27:07.000Z"
+    "downloaded_modified_time": "2026-08-17T07:27:07.000Z",
+    "status": "deleted_in_drive"
   },
   "14IEMsJMTwTa-LIdCAwX6EomRGPX0K8sl": {
     "mimeType": "audio/mpeg",
@@ -297,7 +312,8 @@
     "relative_path": "SFX/crow (chirp).mp3",
     "retrieve_status": "downloaded",
     "downloaded_as": "SFX/crow (chirp).mp3",
-    "downloaded_modified_time": "2026-08-17T07:21:59.000Z"
+    "downloaded_modified_time": "2026-08-17T07:21:59.000Z",
+    "status": "deleted_in_drive"
   },
   "1E5NgiLzXjKZlwTYnIVjxH50dP1XJ9WoQ": {
     "mimeType": "audio/mpeg",
@@ -309,7 +325,8 @@
     "relative_path": "SFX/crow (fly away).mp3",
     "retrieve_status": "downloaded",
     "downloaded_as": "SFX/crow (fly away).mp3",
-    "downloaded_modified_time": "2026-08-17T07:20:26.000Z"
+    "downloaded_modified_time": "2026-08-17T07:20:26.000Z",
+    "status": "deleted_in_drive"
   },
   "16kH6SSfjJxGUu66NKQEti7oVYx9eA6uE": {
     "mimeType": "audio/ogg",
@@ -319,9 +336,7 @@
     "name": "vhs_tape_insert_sound_effect.ogg",
     "modifiedTime": "2026-08-22T14:05:09.000Z",
     "relative_path": "SFX/vhs_tape_insert_sound_effect.ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/vhs_tape_insert_sound_effect.ogg",
-    "downloaded_modified_time": "2026-08-22T14:05:09.000Z"
+    "retrieve_status": "downloaded"
   },
   "1RUYnYxStn3deUQRlp9FWXJVrvO1Izv84": {
     "mimeType": "audio/ogg",
@@ -331,9 +346,7 @@
     "name": "tap-water.ogg",
     "modifiedTime": "2026-08-22T14:04:53.000Z",
     "relative_path": "SFX/tap-water.ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/tap-water.ogg",
-    "downloaded_modified_time": "2026-08-22T14:04:53.000Z"
+    "retrieve_status": "downloaded"
   },
   "1lCNRZga6CkvZdcldluDIzQnHGdTWMiYJ": {
     "mimeType": "audio/ogg",
@@ -343,9 +356,7 @@
     "name": "radio noise.ogg",
     "modifiedTime": "2026-08-22T14:04:40.000Z",
     "relative_path": "SFX/radio noise.ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/radio noise.ogg",
-    "downloaded_modified_time": "2026-08-22T14:04:40.000Z"
+    "retrieve_status": "downloaded"
   },
   "1fDRjsykBTo63IMI-g8MgVu7ws5kVixu4": {
     "mimeType": "audio/ogg",
@@ -355,9 +366,7 @@
     "name": "paper 3.ogg",
     "modifiedTime": "2026-08-22T14:04:25.000Z",
     "relative_path": "SFX/paper 3.ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/paper 3.ogg",
-    "downloaded_modified_time": "2026-08-22T14:04:25.000Z"
+    "retrieve_status": "downloaded"
   },
   "1-1A0TY060KQdwM5cLx3eKmtBMqwpShHq": {
     "mimeType": "audio/ogg",
@@ -367,9 +376,7 @@
     "name": "paper 2.ogg",
     "modifiedTime": "2026-08-22T14:03:53.000Z",
     "relative_path": "SFX/paper 2.ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/paper 2.ogg",
-    "downloaded_modified_time": "2026-08-22T14:03:53.000Z"
+    "retrieve_status": "downloaded"
   },
   "1CGLxBy5AcD7N8lJAuXaRiCn7RJ6STFvm": {
     "mimeType": "audio/ogg",
@@ -379,9 +386,7 @@
     "name": "paper 1.ogg",
     "modifiedTime": "2026-08-22T14:03:30.000Z",
     "relative_path": "SFX/paper 1.ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/paper 1.ogg",
-    "downloaded_modified_time": "2026-08-22T14:03:30.000Z"
+    "retrieve_status": "downloaded"
   },
   "1Xf65-8Bd-FXKk5wwcoyVC5VtuUevOU2f": {
     "mimeType": "audio/ogg",
@@ -391,9 +396,7 @@
     "name": "jumpscare 2.ogg",
     "modifiedTime": "2026-08-22T14:03:15.000Z",
     "relative_path": "SFX/jumpscare 2.ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/jumpscare 2.ogg",
-    "downloaded_modified_time": "2026-08-22T14:03:15.000Z"
+    "retrieve_status": "downloaded"
   },
   "1ltKQK9jUj_rwOG_4WGw4ljDKxdYBeuax": {
     "mimeType": "audio/ogg",
@@ -403,9 +406,7 @@
     "name": "jumpscare 1.ogg",
     "modifiedTime": "2026-08-22T14:03:02.000Z",
     "relative_path": "SFX/jumpscare 1.ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/jumpscare 1.ogg",
-    "downloaded_modified_time": "2026-08-22T14:03:02.000Z"
+    "retrieve_status": "downloaded"
   },
   "1MqbAO7JY4MdZnN-CLDADTkELn4KQ-6Y0": {
     "mimeType": "audio/ogg",
@@ -415,9 +416,7 @@
     "name": "fork on plate.ogg",
     "modifiedTime": "2026-08-22T14:02:45.000Z",
     "relative_path": "SFX/fork on plate.ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/fork on plate.ogg",
-    "downloaded_modified_time": "2026-08-22T14:02:45.000Z"
+    "retrieve_status": "downloaded"
   },
   "1aGGwtquUqtMR8R6u4air9shK8cw4IjYt": {
     "mimeType": "audio/ogg",
@@ -427,9 +426,7 @@
     "name": "event 1.ogg",
     "modifiedTime": "2026-08-22T14:01:55.000Z",
     "relative_path": "SFX/event 1.ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/event 1.ogg",
-    "downloaded_modified_time": "2026-08-22T14:01:55.000Z"
+    "retrieve_status": "downloaded"
   },
   "1vH6ETbKklCqdTlEDyWtGzKv6kGEbgb9D": {
     "mimeType": "audio/ogg",
@@ -439,9 +436,7 @@
     "name": "door (open).ogg",
     "modifiedTime": "2026-08-22T14:01:39.000Z",
     "relative_path": "SFX/door (open).ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/door (open).ogg",
-    "downloaded_modified_time": "2026-08-22T14:01:39.000Z"
+    "retrieve_status": "downloaded"
   },
   "1jmYqNj-bwr_BvPETy4Zug_6irsx3CChX": {
     "mimeType": "audio/ogg",
@@ -451,9 +446,7 @@
     "name": "door (locked).ogg",
     "modifiedTime": "2026-08-22T14:01:24.000Z",
     "relative_path": "SFX/door (locked).ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/door (locked).ogg",
-    "downloaded_modified_time": "2026-08-22T14:01:24.000Z"
+    "retrieve_status": "downloaded"
   },
   "1xZD5HPaZsQiO3izS2p2_i-fBlX_8FrLh": {
     "mimeType": "audio/ogg",
@@ -463,9 +456,7 @@
     "name": "door (closed).ogg",
     "modifiedTime": "2026-08-22T14:01:05.000Z",
     "relative_path": "SFX/door (closed).ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/door (closed).ogg",
-    "downloaded_modified_time": "2026-08-22T14:01:05.000Z"
+    "retrieve_status": "downloaded"
   },
   "12e-BguzyGg_vNzcG4YKYdxSNnCNnyq1x": {
     "mimeType": "audio/ogg",
@@ -475,9 +466,7 @@
     "name": "crow (fly away).ogg",
     "modifiedTime": "2026-08-22T14:00:46.000Z",
     "relative_path": "SFX/crow (fly away).ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/crow (fly away).ogg",
-    "downloaded_modified_time": "2026-08-22T14:00:46.000Z"
+    "retrieve_status": "downloaded"
   },
   "1XbYqStdP2_I6wKk7a0X4sQKaZcRto4kb": {
     "mimeType": "audio/ogg",
@@ -487,9 +476,7 @@
     "name": "crow (chirp).ogg",
     "modifiedTime": "2026-08-22T14:00:30.000Z",
     "relative_path": "SFX/crow (chirp).ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/crow (chirp).ogg",
-    "downloaded_modified_time": "2026-08-22T14:00:30.000Z"
+    "retrieve_status": "downloaded"
   },
   "1dz8eFImQlfau1Ut1-Tp_sip7lq5nePoq": {
     "mimeType": "audio/ogg",
@@ -499,9 +486,7 @@
     "name": "cricket-sound-113945.ogg",
     "modifiedTime": "2026-08-22T14:00:11.000Z",
     "relative_path": "SFX/cricket-sound-113945.ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/cricket-sound-113945.ogg",
-    "downloaded_modified_time": "2026-08-22T14:00:11.000Z"
+    "retrieve_status": "downloaded"
   },
   "1Ob-nQnLJ1wF8UCAcjhmUhwAKy-6a-dyZ": {
     "mimeType": "audio/ogg",
@@ -511,9 +496,7 @@
     "name": "button click.ogg",
     "modifiedTime": "2026-08-22T13:59:53.000Z",
     "relative_path": "SFX/button click.ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/button click.ogg",
-    "downloaded_modified_time": "2026-08-22T13:59:53.000Z"
+    "retrieve_status": "downloaded"
   },
   "1RvMU0jk54aIcB9L82QLy9kH9_-acuaAr": {
     "mimeType": "audio/ogg",
@@ -523,9 +506,7 @@
     "name": "broken glass.ogg",
     "modifiedTime": "2026-08-22T13:59:15.000Z",
     "relative_path": "SFX/broken glass.ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/broken glass.ogg",
-    "downloaded_modified_time": "2026-08-22T13:59:15.000Z"
+    "retrieve_status": "downloaded"
   },
   "1YsyBNDe7UKHURH1Y18kCuaT5NjNYebmD": {
     "mimeType": "audio/ogg",
@@ -535,9 +516,7 @@
     "name": "Breath 1.ogg",
     "modifiedTime": "2026-08-22T13:58:40.000Z",
     "relative_path": "SFX/Breath 1.ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/Breath 1.ogg",
-    "downloaded_modified_time": "2026-08-22T13:58:40.000Z"
+    "retrieve_status": "downloaded"
   },
   "1BpOhrmBzEbF2zPFOphEBuQIWD-FYgS7h": {
     "mimeType": "audio/ogg",
@@ -547,9 +526,7 @@
     "name": "Ambient (dead).ogg",
     "modifiedTime": "2026-08-22T13:58:23.000Z",
     "relative_path": "SFX/Ambient (dead).ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/Ambient (dead).ogg",
-    "downloaded_modified_time": "2026-08-22T13:58:23.000Z"
+    "retrieve_status": "downloaded"
   },
   "1Msvnn9RiGFfW5tmhRsf_DeQlKEpUa8w7": {
     "mimeType": "audio/ogg",
@@ -559,9 +536,7 @@
     "name": "clock ticking.ogg",
     "modifiedTime": "2026-08-20T08:23:21.000Z",
     "relative_path": "SFX/clock ticking.ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/clock ticking.ogg",
-    "downloaded_modified_time": "2026-08-20T08:23:21.000Z"
+    "retrieve_status": "downloaded"
   },
   "1zSLHNyNoN6CYLbH51iAm_4By3WU4nQCP": {
     "mimeType": "audio/ogg",
@@ -571,9 +546,7 @@
     "name": "footstep (grass-left).ogg",
     "modifiedTime": "2026-08-20T08:11:55.000Z",
     "relative_path": "SFX/footstep (grass-left).ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/footstep (grass-left).ogg",
-    "downloaded_modified_time": "2026-08-20T08:11:55.000Z"
+    "retrieve_status": "downloaded"
   },
   "1jjejTn-Uud14KJJuvv9bf5BtLrUsYGQI": {
     "mimeType": "audio/ogg",
@@ -583,9 +556,7 @@
     "name": "footstep (right-grass).ogg",
     "modifiedTime": "2026-08-20T08:11:34.000Z",
     "relative_path": "SFX/footstep (right-grass).ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/footstep (right-grass).ogg",
-    "downloaded_modified_time": "2026-08-20T08:11:34.000Z"
+    "retrieve_status": "downloaded"
   },
   "14zQ-teL-12lewMG5XsGtqt-AS8hIIvlW": {
     "mimeType": "audio/ogg",
@@ -595,9 +566,7 @@
     "name": "running (dirt).ogg",
     "modifiedTime": "2026-08-20T08:09:29.000Z",
     "relative_path": "SFX/running (dirt).ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/running (dirt).ogg",
-    "downloaded_modified_time": "2026-08-20T08:09:29.000Z"
+    "retrieve_status": "downloaded"
   },
   "1cgtrotEuDOj27H13vCGlPtiUv1mKuXsN": {
     "mimeType": "audio/ogg",
@@ -607,9 +576,7 @@
     "name": "footstep (right-dirt).ogg",
     "modifiedTime": "2026-08-20T08:06:06.000Z",
     "relative_path": "SFX/footstep (right-dirt).ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/footstep (right-dirt).ogg",
-    "downloaded_modified_time": "2026-08-20T08:06:06.000Z"
+    "retrieve_status": "downloaded"
   },
   "10lUws-4ETRk5NXgOxiidT5eFxelg4Id3": {
     "mimeType": "audio/ogg",
@@ -619,9 +586,7 @@
     "name": "footstep (left-dirt).ogg",
     "modifiedTime": "2026-08-20T08:05:19.000Z",
     "relative_path": "SFX/footstep (left-dirt).ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/footstep (left-dirt).ogg",
-    "downloaded_modified_time": "2026-08-20T08:05:19.000Z"
+    "retrieve_status": "downloaded"
   },
   "1J4i8GVXkRdI5WOX9lCTXpghpfQMvRXmV": {
     "mimeType": "audio/ogg",
@@ -631,9 +596,7 @@
     "name": "running (indoor).ogg",
     "modifiedTime": "2026-08-20T07:46:18.000Z",
     "relative_path": "SFX/running (indoor).ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/running (indoor).ogg",
-    "downloaded_modified_time": "2026-08-20T07:46:18.000Z"
+    "retrieve_status": "downloaded"
   },
   "1hGSjdF5IivLfbXYH_Cv1T3-GeJPquaIG": {
     "mimeType": "audio/ogg",
@@ -643,9 +606,7 @@
     "name": "footstep (left-indoor).ogg",
     "modifiedTime": "2026-08-20T07:29:35.000Z",
     "relative_path": "SFX/footstep (left-indoor).ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/footstep (left-indoor).ogg",
-    "downloaded_modified_time": "2026-08-20T07:29:35.000Z"
+    "retrieve_status": "downloaded"
   },
   "1QT5gzDcjso3aMrBlCJLju2YqkjDw9HXr": {
     "mimeType": "audio/ogg",
@@ -655,9 +616,7 @@
     "name": "footstep (right-indoor).ogg",
     "modifiedTime": "2026-08-20T07:28:42.000Z",
     "relative_path": "SFX/footstep (right-indoor).ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/footstep (right-indoor).ogg",
-    "downloaded_modified_time": "2026-08-20T07:28:42.000Z"
+    "retrieve_status": "downloaded"
   },
   "1tgiC-XTHtHRfRBHFazu7iN8wartEBByw": {
     "mimeType": "audio/ogg",
@@ -667,9 +626,7 @@
     "name": "knife (pick up).ogg",
     "modifiedTime": "2026-08-20T07:00:39.000Z",
     "relative_path": "SFX/knife (pick up).ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/knife (pick up).ogg",
-    "downloaded_modified_time": "2026-08-20T07:00:39.000Z"
+    "retrieve_status": "downloaded"
   },
   "14cTzJ6XYFDHPqGMD7RL_vYEz6RZ1l6-A": {
     "mimeType": "audio/ogg",
@@ -679,9 +636,7 @@
     "name": "knife (take out).ogg",
     "modifiedTime": "2026-08-20T06:54:59.000Z",
     "relative_path": "SFX/knife (take out).ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/knife (take out).ogg",
-    "downloaded_modified_time": "2026-08-20T06:54:59.000Z"
+    "retrieve_status": "downloaded"
   },
   "1gD-lJaZmDO09GKUCua7CzUstQiDcBZW7": {
     "mimeType": "audio/ogg",
@@ -691,9 +646,7 @@
     "name": "pickup (item).ogg",
     "modifiedTime": "2026-08-20T06:43:13.000Z",
     "relative_path": "SFX/pickup (item).ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/pickup (item).ogg",
-    "downloaded_modified_time": "2026-08-20T06:43:13.000Z"
+    "retrieve_status": "downloaded"
   },
   "1vSb4XqiQmZACHsmQDSjG-RX3bHdPUKAp": {
     "mimeType": "audio/ogg",
@@ -703,9 +656,7 @@
     "name": "keys (pickup).ogg",
     "modifiedTime": "2026-08-20T06:33:54.000Z",
     "relative_path": "SFX/keys (pickup).ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/keys (pickup).ogg",
-    "downloaded_modified_time": "2026-08-20T06:33:54.000Z"
+    "retrieve_status": "downloaded"
   },
   "1ERS8GzNdVI-69Iv2d8LyKODV-ETnNqf6": {
     "mimeType": "audio/ogg",
@@ -715,8 +666,6 @@
     "name": "wakeup morning.ogg",
     "modifiedTime": "2026-08-20T06:06:25.000Z",
     "relative_path": "SFX/wakeup morning.ogg",
-    "retrieve_status": "downloaded",
-    "downloaded_as": "SFX/wakeup morning.ogg",
-    "downloaded_modified_time": "2026-08-20T06:06:25.000Z"
+    "retrieve_status": "downloaded"
   }
 }
