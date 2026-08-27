@@ -111,9 +111,15 @@ public class PlayerInteract : MonoBehaviour
             return;
         }
 
-        Ray ray = new Ray(
-            viewTransform.position,
-            viewTransform.forward
+        // Tepat dari tengah layar
+        Ray ray = viewCamera.ViewportPointToRay(
+            new Vector3(0.5f, 0.5f, 0f)
+        );
+
+        Debug.DrawRay(
+            ray.origin,
+            ray.direction * interactRange,
+            Color.red
         );
 
         if (Physics.Raycast(
@@ -123,7 +129,7 @@ public class PlayerInteract : MonoBehaviour
             interactableMask))
         {
             IInteractable interactable =
-                hit.transform.GetComponentInParent<IInteractable>();
+                hit.collider.GetComponentInParent<IInteractable>();
 
             if (interactable != null && interactable.CanInteract())
             {
@@ -135,7 +141,7 @@ public class PlayerInteract : MonoBehaviour
 
         ClearCurrentInteractable();
     }
-
+    
     public void ShowFailMessage(string message, float duration)
     {
         if (failPromptText != null)
