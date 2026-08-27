@@ -510,7 +510,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: SequencerTest
+          m_StringArgument: All Features - v1.2.0 - Alpha
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!1 &960250311
@@ -776,10 +776,20 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3178714354123533607, guid: 0c88c401719aee361bd0248c09f4e1b1,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7659465124125043339, guid: 0c88c401719aee361bd0248c09f4e1b1,
         type: 3}
       propertyPath: m_Name
       value: ====== SYSTEM ======
+      objectReference: {fileID: 0}
+    - target: {fileID: 8786718041134161729, guid: 0c88c401719aee361bd0248c09f4e1b1,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
