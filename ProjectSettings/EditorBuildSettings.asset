@@ -15,9 +15,12 @@ EditorBuildSettings:
     path: Assets/_Game/04_Scenes/Cutscene/ToOfficeCutscene.unity
     guid: 3e7286ef2f40e0db2b15e978872a5158
   - enabled: 1
-    path: Assets/_Game/04_Scenes/Game/_Alpha/All Features - v1.2.0 - Alpha.unity
+    path: Assets/_Game/04_Scenes/Game/_Alpha/v1.2.0/All Features - v1.2.0 - Alpha.unity
     guid: 74a8c9d507392d985a25388b3e88457c
   - enabled: 1
-    path: Assets/_Game/04_Scenes/Game/_Alpha/InteractScene - v1.3.0 - Alpha.unity
+    path: Assets/_Game/04_Scenes/Game/_Alpha/v1.3.0/InteractScene - v1.3.0 - Alpha.unity
     guid: b6062877b86b041abb298a1fa5db8d22
+  - enabled: 1
+    path: Assets/_Game/04_Scenes/Game/_Alpha/InteractScene - v1.3.1 - Alpha.unity
+    guid: ca739009103d569c6a8e5eb1e8931cc0
   m_configObjects: {}
