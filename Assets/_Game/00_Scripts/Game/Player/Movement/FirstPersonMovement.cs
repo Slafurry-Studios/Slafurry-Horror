@@ -33,6 +33,10 @@ public class FirstPersonMovement : MonoBehaviour
     public float crouchCameraDrop = 0.5f;
     public LayerMask obstacleMask;
 
+    [Header("Movement Lock")]
+    [Tooltip("Kunci manual dari inspector. Runtime pakai LockMovement()/UnlockMovement().")]
+    public bool movementLocked = false;
+
     [Header("Cinemachine")]
     public CinemachineVirtualCamera virtualCamera;
     public Transform cameraHolder;
@@ -41,6 +45,9 @@ public class FirstPersonMovement : MonoBehaviour
     public bool IsCrouching { get; private set; }
     public Vector3 HorizontalVelocity => lastHorizontalVelocity;
     public bool IsGrounded => controller.isGrounded;
+
+    /// <summary>True kalau input gerak (WASD/lari/lompat/jongkok) lagi dikunci.</summary>
+    public bool IsMovementLocked => movementLocked || lockCount > 0;
 
     [HideInInspector] public CharacterController controller;
     public List<System.Func<float>> speedOverrides = new List<System.Func<float>>();
@@ -54,6 +61,8 @@ public class FirstPersonMovement : MonoBehaviour
 
     private Vector3 verticalVelocity;
     private Vector3 lastHorizontalVelocity;
+
+    private int lockCount;
 
     void Awake()
     {
@@ -73,9 +82,49 @@ public class FirstPersonMovement : MonoBehaviour
 
     void Update()
     {
+        if (IsMovementLocked)
+        {
+            HandleLockedMovement();
+            return;
+        }
+
         if (canJump && Input.GetKeyDown(jumpKey)) Jump();
         if (canCrouch && Input.GetKeyDown(crouchKey)) ToggleCrouch();
         HandleMovement();
+    }
+
+    /// <summary>
+    /// Saat dikunci input diabaikan total, tapi gravitasi tetap jalan supaya
+    /// player nggak ngambang kalau di-lock pas lagi di udara / di atas ramp.
+    /// </summary>
+    private void HandleLockedMovement()
+    {
+        IsRunning = false;
+        lastHorizontalVelocity = Vector3.zero;
+
+        if (controller.isGrounded && verticalVelocity.y < 0f) verticalVelocity.y = groundedStickForce;
+        verticalVelocity.y += gravity * Time.deltaTime;
+
+        controller.Move(verticalVelocity * Time.deltaTime);
+    }
+
+    /// <summary>Tambah 1 kunci gerak. Aman dipanggil bertumpuk (dialogue + inspect).</summary>
+    public void LockMovement()
+    {
+        lockCount++;
+    }
+
+    /// <summary>Lepas 1 kunci gerak.</summary>
+    public void UnlockMovement()
+    {
+        lockCount = Mathf.Max(0, lockCount - 1);
+    }
+
+    /// <summary>Buang semua kunci gerak (buat recovery kalau ada yang lupa unlock).</summary>
+    public void ForceUnlockMovement()
+    {
+        lockCount = 0;
+        movementLocked = false;
     }
 
     private void HandleMovement()
