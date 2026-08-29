@@ -39,6 +39,8 @@ public class InspectHUD : MonoBehaviour
 
     private Vector3 previousMousePosition;
 
+    private bool playerMovementLocked;
+
     void Awake()
     {
         firstPersonLook = FindAnyObjectByType<FirstPersonLook>();
@@ -73,6 +75,7 @@ public class InspectHUD : MonoBehaviour
         currentSource = source;
 
         firstPersonLook?.LockRotation();
+        LockPlayerMovement();
 
         if (PlayerInteract.instance != null)
             PlayerInteract.instance.SetInteractionEnabled(false);
@@ -97,6 +100,7 @@ public class InspectHUD : MonoBehaviour
         currentSource = source;
 
         firstPersonLook?.LockRotation();
+        LockPlayerMovement();
 
         if (PlayerInteract.instance != null)
             PlayerInteract.instance.SetInteractionEnabled(false);
@@ -196,6 +200,7 @@ public class InspectHUD : MonoBehaviour
 
         firstPersonLook?.UnlockRotation();
         firstPersonLook?.HideCursor();
+        UnlockPlayerMovement();
 
         if (PlayerInteract.instance != null)
             PlayerInteract.instance.SetInteractionEnabled(true);
@@ -209,6 +214,30 @@ public class InspectHUD : MonoBehaviour
         {
             cg.alpha = 1f;
         }
+    }
+
+    private void LockPlayerMovement()
+    {
+        if (playerMovementLocked) return;
+        if (FirstPersonMovement.instance == null) return;
+
+        FirstPersonMovement.instance.LockMovement();
+        playerMovementLocked = true;
+    }
+
+    private void UnlockPlayerMovement()
+    {
+        if (!playerMovementLocked) return;
+        playerMovementLocked = false;
+
+        if (FirstPersonMovement.instance == null) return;
+        FirstPersonMovement.instance.UnlockMovement();
+    }
+
+    void OnDisable()
+    {
+        // jangan sampai player ketinggalan kekunci kalau HUD-nya dimatikan / scene ganti
+        UnlockPlayerMovement();
     }
 
     private void RestoreObject()
