@@ -18,11 +18,15 @@ public class InspectHUD : MonoBehaviour
     [Tooltip("Kecepatan rotate object dengan mouse")]
     public float rotationSpeed = 100f;
 
+    [Tooltip("Rotasi awal objek relatif ke kamera saat mulai di-inspect")]
+    public Vector3 defaultInspectEuler = new Vector3(0f, 180f, 0f);
+
     private FirstPersonLook firstPersonLook;
     private UIFade uIFade;
 
     private Transform inspectedItem;
     private Transform inspectPivot;
+    private InspectableObject currentSource;
     
 
     private Transform originalParent;
@@ -54,7 +58,8 @@ public class InspectHUD : MonoBehaviour
     public void ReceiveData(
         string title,
         string description,
-        GameObject target)
+        GameObject target,
+        InspectableObject source = null)
     {
         if (titleText != null)
             titleText.text = title;
@@ -62,7 +67,12 @@ public class InspectHUD : MonoBehaviour
         if (descriptionText != null)
             descriptionText.text = description;
 
+        currentSource = source;
+
         firstPersonLook?.LockRotation();
+
+        if (PlayerInteract.instance != null)
+            PlayerInteract.instance.SetInteractionEnabled(false);
 
         InspectObject(target.transform);
 
@@ -77,7 +87,8 @@ public class InspectHUD : MonoBehaviour
     public void ReceiveData(
         string title,
         string description,
-        Transform target)
+        Transform target,
+        InspectableObject source = null)
     {
         if (titleText != null)
             titleText.text = title;
@@ -85,7 +96,12 @@ public class InspectHUD : MonoBehaviour
         if (descriptionText != null)
             descriptionText.text = description;
 
+        currentSource = source;
+
         firstPersonLook?.LockRotation();
+
+        if (PlayerInteract.instance != null)
+            PlayerInteract.instance.SetInteractionEnabled(false);
 
         InspectObject(target);
 
@@ -107,24 +123,29 @@ public class InspectHUD : MonoBehaviour
         originalLocalRotation = target.localRotation;
         originalLocalScale = target.localScale;
 
-        Bounds bounds = CalculateBounds(target);
-
+        // fix bug to make them face camera oninspect
         GameObject pivotObject = new GameObject("InspectPivot");
         inspectPivot = pivotObject.transform;
 
-        inspectPivot.position = bounds.center;
-        inspectPivot.rotation = Quaternion.identity;
-
-        inspectPivot.SetParent(examinePoint, true);
-
-        // Masukkan object ke pivot
-        target.SetParent(inspectPivot, true);
+        inspectPivot.SetParent(examinePoint, false);
 
         inspectPivot.localPosition = new Vector3(
             0f,
             0f,
             inspectDistance
         );
+
+        inspectPivot.localRotation = Quaternion.identity;
+
+        target.SetParent(inspectPivot, false);
+
+        target.localRotation = Quaternion.Euler(defaultInspectEuler);
+        target.localPosition = Vector3.zero;
+
+        Bounds bounds = CalculateBounds(target);
+
+        target.localPosition -=
+            inspectPivot.InverseTransformPoint(bounds.center);
 
         // Cursor
         Cursor.lockState = CursorLockMode.None;
@@ -143,18 +164,19 @@ public class InspectHUD : MonoBehaviour
             Vector3 delta =
                 Input.mousePosition - previousMousePosition;
 
-            float rotateX =
-                delta.y * rotationSpeed * Time.deltaTime;
+            float speed = rotationSpeed * Time.deltaTime;
 
-            float rotateY =
-                -delta.x * rotationSpeed * Time.deltaTime;
+            inspectPivot.Rotate(
+                examinePoint.up,
+                -delta.x * speed,
+                Space.World
+            );
 
-            inspectPivot.rotation =
-                Quaternion.Euler(
-                    rotateX,
-                    rotateY,
-                    0f
-                ) * inspectPivot.rotation;
+            inspectPivot.Rotate(
+                examinePoint.right,
+                delta.y * speed,
+                Space.World
+            );
 
             previousMousePosition = Input.mousePosition;
         }
@@ -162,12 +184,23 @@ public class InspectHUD : MonoBehaviour
 
     public void Hide()
     {
+        bool wasInspecting = inspectedItem != null;
+        InspectableObject source = currentSource;
+
         RestoreObject();
+
+        currentSource = null;
 
         firstPersonLook?.UnlockRotation();
         firstPersonLook?.HideCursor();
 
+        if (PlayerInteract.instance != null)
+            PlayerInteract.instance.SetInteractionEnabled(true);
+
         uIFade?.FadeOut();
+
+        if (wasInspecting && source != null)
+            source.NotifyInspectClosed();
     }
 
     private void RestoreObject()
