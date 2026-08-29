@@ -10,8 +10,8 @@ public class DialogueTrigger : BaseTrigger
         if (!CanTrigger()) return;
 
         if (DialoguePlayer.instance == null) return;
-        DialoguePlayer.instance.Play(dialogue, onComplete);
-        
+        if (!DialoguePlayer.instance.Play(dialogue, onComplete)) return;
+
         AddTriggerCount();
     }
 }

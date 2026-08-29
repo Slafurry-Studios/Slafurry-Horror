@@ -16,6 +16,7 @@ public class InspectableObject : MonoBehaviour, IInteractable
 
     [Header("Events")]
     public InspectEvent OnInspect;
+    public UnityEvent OnInspectClosed;
 
     private InspectHUD inspectHUD;
 
@@ -37,6 +38,11 @@ public class InspectableObject : MonoBehaviour, IInteractable
     public void Interact()
     {
         OnInspect?.Invoke(title, description, gameObject);
-        inspectHUD?.ReceiveData(title, description, gameObject);
+        inspectHUD?.ReceiveData(title, description, gameObject, this);
+    }
+
+    public void NotifyInspectClosed()
+    {
+        OnInspectClosed?.Invoke();
     }
 }

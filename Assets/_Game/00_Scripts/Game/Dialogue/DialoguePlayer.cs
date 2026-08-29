@@ -23,11 +23,12 @@ public class DialoguePlayer : MonoBehaviour
 
     private void Awake() => instance = this;
 
-    public void Play(DialogueData data, UnityEvent onComplete = null)
+    public bool Play(DialogueData data, UnityEvent onComplete = null)
     {
-        if (IsPlaying) return;
-        if (data == null || data.lines == null || data.lines.Length == 0) return;
+        if (IsPlaying) return false;
+        if (data == null || data.lines == null || data.lines.Length == 0) return false;
         StartCoroutine(RunDialogue(data, onComplete));
+        return true;
     }
 
     private IEnumerator RunDialogue(DialogueData data, UnityEvent onComplete)

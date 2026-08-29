@@ -24,7 +24,7 @@ public class DialogueTriggerZone : MonoBehaviour
     {
         if (playOnce && _played) return;
         if (DialoguePlayer.instance == null) return;
-        DialoguePlayer.instance.Play(dialogue);
+        if (!DialoguePlayer.instance.Play(dialogue)) return;
         _played = true;
     }
 }
