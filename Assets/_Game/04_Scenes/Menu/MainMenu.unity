@@ -897,6 +897,11 @@ PrefabInstance:
       objectReference: {fileID: 8468961151309403261}
     - target: {fileID: 6429109925603218231, guid: c84e02c25bfa70c959591b988820e9f5,
         type: 3}
+      propertyPath: gameScene
+      value: InteractScene - v1.3.0 - Alpha
+      objectReference: {fileID: 0}
+    - target: {fileID: 6429109925603218231, guid: c84e02c25bfa70c959591b988820e9f5,
+        type: 3}
       propertyPath: settingsMenu
       value: 
       objectReference: {fileID: 943142370}

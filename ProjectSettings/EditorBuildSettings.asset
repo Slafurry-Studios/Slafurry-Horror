@@ -17,4 +17,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_Game/04_Scenes/Game/_Alpha/All Features - v1.2.0 - Alpha.unity
     guid: 74a8c9d507392d985a25388b3e88457c
+  - enabled: 1
+    path: Assets/_Game/04_Scenes/Game/_Alpha/InteractScene - v1.3.0 - Alpha.unity
+    guid: b6062877b86b041abb298a1fa5db8d22
   m_configObjects: {}
