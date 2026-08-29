@@ -12,6 +12,9 @@ public class InspectHUD : MonoBehaviour
     [Header("Inspect Object")]
     public Transform examinePoint;
 
+    [Header("NeedsToHide")]
+    [SerializeField] private CanvasGroup[] hideGroups;
+
     [Tooltip("Jarak object dari examine point")]
     public float inspectDistance = 0.5f;
 
@@ -27,7 +30,7 @@ public class InspectHUD : MonoBehaviour
     private Transform inspectedItem;
     private Transform inspectPivot;
     private InspectableObject currentSource;
-    
+
 
     private Transform originalParent;
     private Vector3 originalLocalPosition;
@@ -77,11 +80,6 @@ public class InspectHUD : MonoBehaviour
         InspectObject(target.transform);
 
         uIFade?.FadeIn();
-    }
-    private void PickUpObject()
-    {
-        if (inspectedItem != null)
-            return;
     }
 
     public void ReceiveData(
@@ -150,6 +148,11 @@ public class InspectHUD : MonoBehaviour
         // Cursor
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
+
+        foreach (var cg in hideGroups)
+        {
+            cg.alpha = 0f;
+        }
     }
 
     private void HandleRotation()
@@ -201,6 +204,11 @@ public class InspectHUD : MonoBehaviour
 
         if (wasInspecting && source != null)
             source.NotifyInspectClosed();
+
+        foreach (var cg in hideGroups)
+        {
+            cg.alpha = 1f;
+        }
     }
 
     private void RestoreObject()
