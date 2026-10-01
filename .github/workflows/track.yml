@@ -1,150 +1,150 @@
-name: Track Drive Changes
+# name: Track Drive Changes
 
-on:
-  schedule:
-    - cron: '0 23 * * *'  # 07:00 WITA (UTC+8) daily
-  workflow_dispatch: {}
+# on:
+#   schedule:
+#     - cron: '0 23 * * *'  # 07:00 WITA (UTC+8) daily
+#   workflow_dispatch: {}
 
-permissions:
-  contents: write
-  pull-requests: write
+# permissions:
+#   contents: write
+#   pull-requests: write
 
-jobs:
-  track:
-    runs-on: ubuntu-latest
+# jobs:
+#   track:
+#     runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-depth: 0
+#     steps:
+#       - uses: actions/checkout@v4
+#         with:
+#           ref: main
+#           fetch-depth: 0
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
+#       - uses: actions/setup-python@v5
+#         with:
+#           python-version: '3.11'
 
-      - run: pip install -r requirements.txt
+#       - run: pip install -r requirements.txt
 
-      - name: Check sprite folder for changes
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
-          GEMINI_PERSONA: ${{ secrets.GEMINI_PERSONA }}
-        run: |
-          python track.py \
-            --drive-folder-id "${{ secrets.DRIVE_SPRITE_FOLDER_ID }}" \
-            --service-account-b64 "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON_B64 }}" \
-            --discord-webhook "${{ secrets.DISCORD_WEBHOOK_URL }}" \
-            --state-file "state/sprite_manifest.json" \
-            --project-name "${{ github.repository }} (sprite)"
+#       - name: Check sprite folder for changes
+#         env:
+#           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+#           GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+#           GEMINI_PERSONA: ${{ secrets.GEMINI_PERSONA }}
+#         run: |
+#           python track.py \
+#             --drive-folder-id "${{ secrets.DRIVE_SPRITE_FOLDER_ID }}" \
+#             --service-account-b64 "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON_B64 }}" \
+#             --discord-webhook "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+#             --state-file "state/sprite_manifest.json" \
+#             --project-name "${{ github.repository }} (sprite)"
 
-      - name: Check audio folder for changes
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
-          GEMINI_PERSONA: ${{ secrets.GEMINI_PERSONA }}
-        run: |
-          python track.py \
-            --drive-folder-id "${{ secrets.DRIVE_AUDIO_FOLDER_ID }}" \
-            --service-account-b64 "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON_B64 }}" \
-            --discord-webhook "${{ secrets.DISCORD_WEBHOOK_URL }}" \
-            --state-file "state/audio_manifest.json" \
-            --project-name "${{ github.repository }} (audio)"
+#       - name: Check audio folder for changes
+#         env:
+#           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+#           GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+#           GEMINI_PERSONA: ${{ secrets.GEMINI_PERSONA }}
+#         run: |
+#           python track.py \
+#             --drive-folder-id "${{ secrets.DRIVE_AUDIO_FOLDER_ID }}" \
+#             --service-account-b64 "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON_B64 }}" \
+#             --discord-webhook "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+#             --state-file "state/audio_manifest.json" \
+#             --project-name "${{ github.repository }} (audio)"
 
-      - name: Check mesh folder for changes
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
-          GEMINI_PERSONA: ${{ secrets.GEMINI_PERSONA }}
-        run: |
-          python track.py \
-            --drive-folder-id "${{ secrets.DRIVE_MESH_FOLDER_ID }}" \
-            --service-account-b64 "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON_B64 }}" \
-            --discord-webhook "${{ secrets.DISCORD_WEBHOOK_URL }}" \
-            --state-file "state/mesh_manifest.json" \
-            --project-name "${{ github.repository }} (mesh)"
+#       - name: Check mesh folder for changes
+#         env:
+#           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+#           GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+#           GEMINI_PERSONA: ${{ secrets.GEMINI_PERSONA }}
+#         run: |
+#           python track.py \
+#             --drive-folder-id "${{ secrets.DRIVE_MESH_FOLDER_ID }}" \
+#             --service-account-b64 "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON_B64 }}" \
+#             --discord-webhook "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+#             --state-file "state/mesh_manifest.json" \
+#             --project-name "${{ github.repository }} (mesh)"
 
-      - name: Check texture folder for changes
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
-          GEMINI_PERSONA: ${{ secrets.GEMINI_PERSONA }}
-        run: |
-          python track.py \
-            --drive-folder-id "${{ secrets.DRIVE_TEXTURE_FOLDER_ID }}" \
-            --service-account-b64 "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON_B64 }}" \
-            --discord-webhook "${{ secrets.DISCORD_WEBHOOK_URL }}" \
-            --state-file "state/texture_manifest.json" \
-            --project-name "${{ github.repository }} (texture)"
+#       - name: Check texture folder for changes
+#         env:
+#           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+#           GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+#           GEMINI_PERSONA: ${{ secrets.GEMINI_PERSONA }}
+#         run: |
+#           python track.py \
+#             --drive-folder-id "${{ secrets.DRIVE_TEXTURE_FOLDER_ID }}" \
+#             --service-account-b64 "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON_B64 }}" \
+#             --discord-webhook "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+#             --state-file "state/texture_manifest.json" \
+#             --project-name "${{ github.repository }} (texture)"
 
-      - name: Commit state to chore/track-state
-        id: commit
-        env:
-          BOT_GIT_USERNAME: ${{ vars.BOT_GIT_USERNAME || 'Kei Tendou' }}
-          BOT_GIT_EMAIL: ${{ vars.BOT_GIT_EMAIL || 'Slafurry[bot]@users.noreply.github.com' }}
-        run: |
-          git config user.name "$BOT_GIT_USERNAME"
-          git config user.email "$BOT_GIT_EMAIL"
+#       - name: Commit state to chore/track-state
+#         id: commit
+#         env:
+#           BOT_GIT_USERNAME: ${{ vars.BOT_GIT_USERNAME || 'Kei Tendou' }}
+#           BOT_GIT_EMAIL: ${{ vars.BOT_GIT_EMAIL || 'Slafurry[bot]@users.noreply.github.com' }}
+#         run: |
+#           git config user.name "$BOT_GIT_USERNAME"
+#           git config user.email "$BOT_GIT_EMAIL"
 
-          git fetch origin main
+#           git fetch origin main
 
-          WORKTREE=/tmp/chore-track-state
+#           WORKTREE=/tmp/chore-track-state
 
-          # Always recreate the branch from latest main, same pattern
-          # as the retrieve workflow, so it never carries stale history.
-          git branch -D chore/track-state 2>/dev/null || true
-          git push origin --delete chore/track-state 2>/dev/null || true
+#           # Always recreate the branch from latest main, same pattern
+#           # as the retrieve workflow, so it never carries stale history.
+#           git branch -D chore/track-state 2>/dev/null || true
+#           git push origin --delete chore/track-state 2>/dev/null || true
 
-          git worktree add -b chore/track-state "$WORKTREE" origin/main
+#           git worktree add -b chore/track-state "$WORKTREE" origin/main
 
-          mkdir -p "$WORKTREE/state"
-          cp -f state/*.json "$WORKTREE/state/" 2>/dev/null || true
+#           mkdir -p "$WORKTREE/state"
+#           cp -f state/*.json "$WORKTREE/state/" 2>/dev/null || true
 
-          cd "$WORKTREE"
-          git add state/
+#           cd "$WORKTREE"
+#           git add state/
 
-          if git diff --cached --quiet; then
-            echo "No state changes, skipping."
-            echo "has_changes=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
+#           if git diff --cached --quiet; then
+#             echo "No state changes, skipping."
+#             echo "has_changes=false" >> "$GITHUB_OUTPUT"
+#             exit 0
+#           fi
 
-          git commit -m "chore(assets): update drive state [skip ci]"
-          git push origin HEAD:chore/track-state
+#           git commit -m "chore(assets): update drive state [skip ci]"
+#           git push origin HEAD:chore/track-state
 
-          echo "has_changes=true" >> "$GITHUB_OUTPUT"
+#           echo "has_changes=true" >> "$GITHUB_OUTPUT"
 
-      - name: Create PR
-        if: steps.commit.outputs.has_changes == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.PR_PAT || secrets.GITHUB_TOKEN }}
-        run: |
-          cd /tmp/chore-track-state
+#       - name: Create PR
+#         if: steps.commit.outputs.has_changes == 'true'
+#         env:
+#           GH_TOKEN: ${{ secrets.PR_PAT || secrets.GITHUB_TOKEN }}
+#         run: |
+#           cd /tmp/chore-track-state
 
-          TITLE="chore(assets): update drive state"
-          BODY="Automated Drive change-tracking state update.
+#           TITLE="chore(assets): update drive state"
+#           BODY="Automated Drive change-tracking state update.
 
-          Last updated: $(date -u +'%Y-%m-%d %H:%M UTC')"
+#           Last updated: $(date -u +'%Y-%m-%d %H:%M UTC')"
 
-          OPEN_PR=$(gh pr list \
-            --head chore/track-state \
-            --state open \
-            --repo "${{ github.repository }}" \
-            --json number \
-            --jq '.[0].number')
+#           OPEN_PR=$(gh pr list \
+#             --head chore/track-state \
+#             --state open \
+#             --repo "${{ github.repository }}" \
+#             --json number \
+#             --jq '.[0].number')
 
-          if [ -n "$OPEN_PR" ]; then
-            echo "Open PR #$OPEN_PR already exists, updating it."
-            gh pr edit "$OPEN_PR" \
-              --title "$TITLE" \
-              --body "$BODY" \
-              --repo "${{ github.repository }}"
-          else
-            echo "No open PR found, creating a new one."
-            gh pr create \
-              --base main \
-              --head chore/track-state \
-              --title "$TITLE" \
-              --body "$BODY" \
-              --repo "${{ github.repository }}"
-          fi
+#           if [ -n "$OPEN_PR" ]; then
+#             echo "Open PR #$OPEN_PR already exists, updating it."
+#             gh pr edit "$OPEN_PR" \
+#               --title "$TITLE" \
+#               --body "$BODY" \
+#               --repo "${{ github.repository }}"
+#           else
+#             echo "No open PR found, creating a new one."
+#             gh pr create \
+#               --base main \
+#               --head chore/track-state \
+#               --title "$TITLE" \
+#               --body "$BODY" \
+#               --repo "${{ github.repository }}"
+#           fi
