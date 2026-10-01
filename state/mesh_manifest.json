@@ -57,7 +57,8 @@
     "name": "Tree_5.fbx",
     "modifiedTime": "2026-07-18T15:13:07.000Z",
     "relative_path": "Object/Tree_5.fbx",
-    "retrieve_status": "downloaded"
+    "retrieve_status": "downloaded",
+    "status": "deleted_in_drive"
   },
   "1oACPulw0is4Wg3G-uXpWJFTN2EwWBeOT": {
     "mimeType": "application/octet-stream",
@@ -368,5 +369,50 @@
     "modifiedTime": "2026-05-02T18:05:04.000Z",
     "relative_path": "TEXTURE MAP/3D_Color_palette.png",
     "retrieve_status": "downloaded"
+  },
+  "17iilSbS3W34fEBhg55uXh1RUti_hsB3a": {
+    "mimeType": "application/octet-stream",
+    "webViewLink": "https://drive.google.com/file/d/17iilSbS3W34fEBhg55uXh1RUti_hsB3a/view?usp=drivesdk",
+    "size": "47228",
+    "id": "17iilSbS3W34fEBhg55uXh1RUti_hsB3a",
+    "name": "Telepon rumah.fbx",
+    "modifiedTime": "2026-09-08T13:55:28.000Z",
+    "relative_path": "Object/Telepon rumah.fbx"
+  },
+  "1ZHE4M7QqxP56tyvpq0tLKd4Nt_WXRMPB": {
+    "mimeType": "application/octet-stream",
+    "webViewLink": "https://drive.google.com/file/d/1ZHE4M7QqxP56tyvpq0tLKd4Nt_WXRMPB/view?usp=drivesdk",
+    "size": "19452",
+    "id": "1ZHE4M7QqxP56tyvpq0tLKd4Nt_WXRMPB",
+    "name": "Tree_5.fbx",
+    "modifiedTime": "2026-09-08T13:30:22.000Z",
+    "relative_path": "Object/Tree_5.fbx"
+  },
+  "1hr0h2lEs0QiT8yhRVajVBxfH3zO-j3n6": {
+    "mimeType": "application/octet-stream",
+    "webViewLink": "https://drive.google.com/file/d/1hr0h2lEs0QiT8yhRVajVBxfH3zO-j3n6/view?usp=drivesdk",
+    "size": "132108",
+    "id": "1hr0h2lEs0QiT8yhRVajVBxfH3zO-j3n6",
+    "name": "Pot bunga.fbx",
+    "modifiedTime": "2026-09-08T13:23:47.000Z",
+    "relative_path": "Object/Pot bunga.fbx"
+  },
+  "1pmq7bgeQBQxc891UmeVGgqEWXyFg2DA8": {
+    "mimeType": "application/octet-stream",
+    "webViewLink": "https://drive.google.com/file/d/1pmq7bgeQBQxc891UmeVGgqEWXyFg2DA8/view?usp=drivesdk",
+    "size": "18812",
+    "id": "1pmq7bgeQBQxc891UmeVGgqEWXyFg2DA8",
+    "name": "Karpet.fbx",
+    "modifiedTime": "2026-09-08T13:23:30.000Z",
+    "relative_path": "Object/Karpet.fbx"
+  },
+  "1L5ZCjBQOsKWpEuLO1F4sVQFIr5qb3RSh": {
+    "mimeType": "application/octet-stream",
+    "webViewLink": "https://drive.google.com/file/d/1L5ZCjBQOsKWpEuLO1F4sVQFIr5qb3RSh/view?usp=drivesdk",
+    "size": "53228",
+    "id": "1L5ZCjBQOsKWpEuLO1F4sVQFIr5qb3RSh",
+    "name": "Kursi dan Meja.fbx",
+    "modifiedTime": "2026-09-08T13:23:20.000Z",
+    "relative_path": "Object/Kursi dan Meja.fbx"
   }
 }
